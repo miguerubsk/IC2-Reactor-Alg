@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 13-may-2024 Miguel González García
+ * Copyright (C) 2024 Miguel González García
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import Simulator.ReactorComponent;
  *
  * @author Miguel González García
  */
-public class ReactorEntity implements Comparable {
+public class ReactorEntity implements Comparable<ReactorEntity> {
 
     public final Reactor reactor = new Reactor();
 
@@ -288,8 +288,7 @@ public class ReactorEntity implements Comparable {
      * @return 
      */
     @Override
-    public int compareTo(Object o) {
-        ReactorEntity e = (ReactorEntity) o;
-        return (int) (e.fitness - this.fitness);
+    public int compareTo(ReactorEntity o) {
+        return (int) (o.fitness - this.fitness);
     }
 }
