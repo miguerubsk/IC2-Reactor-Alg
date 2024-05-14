@@ -32,13 +32,13 @@ import java.io.PrintWriter;
  */
 public class GeneticAlg {
 
-    public int POPULATION_SIZE, TOURNAMENT_SIZE, GENERATIONS, FREE_PASS, FRESH_BLOOD, MUTATION_CHANCE; // x in a 1 000 000
+    private int POPULATION_SIZE, TOURNAMENT_SIZE, GENERATIONS, FREE_PASS, FRESH_BLOOD, MUTATION_CHANCE, MAX_GENREATIONS_WITHOUT_IMPROVEMENT; // x in a 1 000 000
 
-    codeHelper ch;
-    Random rnd;
+    private final codeHelper ch;
+    private final Random rnd;
 
-    ReactorEntity best;
-    ArrayList<ReactorEntity> population;
+    private ReactorEntity best, BEST;
+    private ArrayList<ReactorEntity> population;
 
     /**
      *
@@ -70,6 +70,9 @@ public class GeneticAlg {
                     case "MUTATION_CHANCE":
                         this.MUTATION_CHANCE = Integer.parseInt(split[1]);
                         break;
+                    case "MAX_GENREATIONS_WITHOUT_IMPROVEMENT":
+                        this.MAX_GENREATIONS_WITHOUT_IMPROVEMENT = Integer.parseInt(split[1]);
+                        break;
                 }
             }
         } catch (IOException e) {
@@ -81,13 +84,14 @@ public class GeneticAlg {
             FREE_PASS = 1;
             FRESH_BLOOD = 15;
             MUTATION_CHANCE = 70000;
+            MAX_GENREATIONS_WITHOUT_IMPROVEMENT = 50;
         }
 
         if (GENERATIONS == 0) {
             GENERATIONS = Integer.MAX_VALUE;
         }
 
-        if (FREE_PASS == 0 || FRESH_BLOOD == 0 || MUTATION_CHANCE == 0 || POPULATION_SIZE == 0 || TOURNAMENT_SIZE == 0) {
+        if (FREE_PASS == 0 || FRESH_BLOOD == 0 || MUTATION_CHANCE == 0 || POPULATION_SIZE == 0 || TOURNAMENT_SIZE == 0 || MAX_GENREATIONS_WITHOUT_IMPROVEMENT == 0) {
             System.err.println("Using default config");
             POPULATION_SIZE = 100;
             TOURNAMENT_SIZE = 3;
@@ -95,6 +99,7 @@ public class GeneticAlg {
             FREE_PASS = 1;
             FRESH_BLOOD = 15;
             MUTATION_CHANCE = 70000;
+            MAX_GENREATIONS_WITHOUT_IMPROVEMENT = 50;
         }
 
         ch = new codeHelper();
@@ -106,11 +111,19 @@ public class GeneticAlg {
         }
         best.calculateFitness();
     }
+    
+    private void resetPopulation(){
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            population.add(new ReactorEntity(ch.getRandomCode()));
+        }
+    }
 
     /**
      *
      */
     public void run() {
+        
+        int lastImproved = 0;
 
         for (int k = 0; k < GENERATIONS; k++) {
 
@@ -119,10 +132,19 @@ public class GeneticAlg {
             Collections.sort(population);
 
             if (population.get(0).fitness > best.fitness) {
+                lastImproved = 0;
                 best = new ReactorEntity(population.get(0).reactor.getCode());
                 best.calculateFitness();
                 System.out.printf("Found new best! %f\n", best.fitness);
+            }else{
+                lastImproved++;
             }
+            
+//            if(lastImproved >= MAX_GENREATIONS_WITHOUT_IMPROVEMENT) {
+//                System.out.println(lastImproved + " generations without improvement. Restarting population.");
+//                resetPopulation();
+//                lastImproved = 0;
+//            }
 
             ArrayList<ReactorEntity> newPop = new ArrayList<>(POPULATION_SIZE);
 
