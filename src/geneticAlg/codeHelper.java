@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 13-may-2024 Miguel González García
+ * Copyright (C) 2024 Miguel González García
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import java.util.Random;
  */
 public class codeHelper {
 
-    Random rnd = new Random();
+    Random rnd = new Random(System.currentTimeMillis());
     public final String[] validIDs = {"1B", "0D", "11", "14"};
 
     /**
@@ -81,6 +81,40 @@ public class codeHelper {
                 sb.append(code2.charAt(i));
             } else {
                 sb.append(code1.charAt(i));
+            }
+        }
+        return sb.toString();
+    }
+    
+    /**
+     * 
+     * @param code1
+     * @param code2
+     * @return 
+     */
+    public String twoPointCrossover(String code1, String code2) {
+        int pos1 = rnd.nextInt(53) * 2;
+        int pos2 = rnd.nextInt(53) * 2;
+        
+        if(pos2 < pos1){
+            int aux = pos1;
+            pos1 = pos2;
+            pos2 = aux;
+        }
+        
+        StringBuilder sb = new StringBuilder(108);
+        
+        for (int i = 0; i < 108; i++) {
+            if (i >= pos1 && i <= pos2) {
+                sb.append(code2.charAt(i));
+            }
+            
+            if (i < pos1){
+                sb.append(code1.charAt(i));
+            }
+            
+            if(i > pos2){
+                sb.append(code2.charAt(i));
             }
         }
         return sb.toString();
