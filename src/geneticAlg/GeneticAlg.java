@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 13-may-2024 Miguel González García
+ * Copyright (C) 2024 Miguel González García
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,12 @@ package geneticAlg;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
 /**
  *
@@ -26,23 +32,75 @@ import java.util.Random;
  */
 public class GeneticAlg {
 
-    public final int POPULATION_SIZE = 100;
-    public final int TOURNAMENT_SIZE = 3;
-    public final int GENERATIONS = 1000;
-    public final int FREE_PASS = 1;
-    public final int FRESH_BLOOD = 15;
-    public final int MUTATION_CHANCE = 700000; // x in a 1 000 000
+    public int POPULATION_SIZE, TOURNAMENT_SIZE, GENERATIONS, FREE_PASS, FRESH_BLOOD, MUTATION_CHANCE; // x in a 1 000 000
 
-    codeHelper ch = new codeHelper();
-    Random rnd = new Random();
+    codeHelper ch;
+    Random rnd;
 
-    ReactorEntity best = new ReactorEntity(ch.getRandomCode());
-    ArrayList<ReactorEntity> population = new ArrayList<>(POPULATION_SIZE);
+    ReactorEntity best;
+    ArrayList<ReactorEntity> population;
 
     /**
-     * 
+     *
      */
     public GeneticAlg() {
+        try {
+            FileReader fileReader = new FileReader("config.txt");
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String line;
+
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] split = line.split(" = ");
+                switch (split[0]) {
+                    case "POPULATION_SIZE":
+                        this.POPULATION_SIZE = Integer.parseInt(split[1]);
+                        break;
+                    case "TOURNAMENT_SIZE":
+                        this.TOURNAMENT_SIZE = Integer.parseInt(split[1]);
+                        break;
+                    case "GENERATIONS":
+                        this.GENERATIONS = Integer.parseInt(split[1]);
+                        break;
+                    case "FREE_PASS":
+                        this.FREE_PASS = Integer.parseInt(split[1]);
+                        break;
+                    case "FRESH_BLOOD":
+                        this.FRESH_BLOOD = Integer.parseInt(split[1]);
+                        break;
+                    case "MUTATION_CHANCE":
+                        this.MUTATION_CHANCE = Integer.parseInt(split[1]);
+                        break;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println(e);
+            System.err.println("Using default config");
+            POPULATION_SIZE = 100;
+            TOURNAMENT_SIZE = 3;
+            GENERATIONS = 1000;
+            FREE_PASS = 1;
+            FRESH_BLOOD = 15;
+            MUTATION_CHANCE = 70000;
+        }
+
+        if (GENERATIONS == 0) {
+            GENERATIONS = Integer.MAX_VALUE;
+        }
+
+        if (FREE_PASS == 0 || FRESH_BLOOD == 0 || MUTATION_CHANCE == 0 || POPULATION_SIZE == 0 || TOURNAMENT_SIZE == 0) {
+            System.err.println("Using default config");
+            POPULATION_SIZE = 100;
+            TOURNAMENT_SIZE = 3;
+            GENERATIONS = 1000;
+            FREE_PASS = 1;
+            FRESH_BLOOD = 15;
+            MUTATION_CHANCE = 70000;
+        }
+
+        ch = new codeHelper();
+        rnd = new Random(System.currentTimeMillis());
+        best = new ReactorEntity(ch.getRandomCode());
+        population = new ArrayList<>(POPULATION_SIZE);
         for (int i = 0; i < POPULATION_SIZE; i++) {
             population.add(new ReactorEntity(ch.getRandomCode()));
         }
@@ -50,7 +108,7 @@ public class GeneticAlg {
     }
 
     /**
-     * 
+     *
      */
     public void run() {
 
@@ -87,7 +145,14 @@ public class GeneticAlg {
                 Collections.sort(tournament1);
                 Collections.sort(tournament2);
 
-                String childCode = ch.onePointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
+                String childCode;
+
+                if (rnd.nextBoolean()) {
+                    childCode = ch.onePointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
+                } else {
+                    childCode = ch.twoPointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
+                }
+
                 int proc = rnd.nextInt(1000000);
                 if (proc < MUTATION_CHANCE) {
                     childCode = ch.mutateGene(childCode);
@@ -95,10 +160,29 @@ public class GeneticAlg {
 
                 newPop.add(new ReactorEntity(childCode));
             }
-            System.out.printf("Just finished generation %d with best fitness of %f, code: %s\n", k, population.get(0).fitness, population.get(0).reactor.getCode());
+            System.out.printf("Just finished generation %d of %d with best fitness of %f, code: %s\n", k, GENERATIONS, population.get(0).fitness, population.get(0).reactor.getCode());
             population = newPop;
         }
 
         System.out.printf("Best found(%f) reactor was: %s", best.fitness, best.reactor.getCode());
+
+        File file = new File("result.txt");
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            } else {
+                file.delete();
+                file.createNewFile();
+            }
+            
+            try (FileWriter fileWriter = new FileWriter("result.txt")) {
+                PrintWriter pw = new PrintWriter(fileWriter);
+                
+                pw.write("Best found(" + best.fitness + ") reactor was: " + best.reactor.getCode());
+            }
+
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
     }
 }
