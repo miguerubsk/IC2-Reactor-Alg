@@ -9,7 +9,7 @@ public class CoolantCell180kHelium extends ReactorComponent {
     /**
      * The filename for the image to show for the component.
      */
-    private static final String imageFilename = "gt.180k_Helium_Coolantcell.png";    
+    private static final String IMAGEFILENAME = "gt.180k_Helium_Coolantcell.png";    
     
     public static final MaterialsList MATERIALS = new MaterialsList(3, CoolantCell60kHelium.MATERIALS, 6, "Tin");
     
@@ -17,7 +17,7 @@ public class CoolantCell180kHelium extends ReactorComponent {
      * Creates a new instance.
      */
     public CoolantCell180kHelium() {
-        setImage(TextureFactory.getImage(imageFilename));
+        setImage(TextureFactory.getImage(IMAGEFILENAME));
         setMaxHeat(180000);
         automationThreshold = 170000;
     }

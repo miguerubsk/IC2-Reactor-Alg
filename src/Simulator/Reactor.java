@@ -48,12 +48,12 @@ public class Reactor {
     }
 
     public void clearGrid() {
-        for (int row = 0; row < grid.length; row++) {
-            for (int col = 0; col < grid[row].length; col++) {
-                if (grid[row][col] != null) {
-                    grid[row][col].removeFromReactor();
+        for (ReactorComponent[] grid1 : grid) {
+            for (int col = 0; col < grid1.length; col++) {
+                if (grid1[col] != null) {
+                    grid1[col].removeFromReactor();
                 }
-                grid[row][col] = null;
+                grid1[col] = null;
             }
         }
     }

@@ -9,7 +9,7 @@ public class ContainmentReactorPlating extends ReactorComponent {
     /**
      * The filename for the image to show for the component.
      */
-    private static final String imageFilename = "reactorPlatingExplosive.png";    
+    private static final String IMAGEFILENAME = "reactorPlatingExplosive.png";    
     
     public static final MaterialsList MATERIALS = new MaterialsList(ReactorPlating.MATERIALS, 2, "Advanced Alloy");
     
@@ -17,7 +17,7 @@ public class ContainmentReactorPlating extends ReactorComponent {
      * Creates a new instance.
      */
     public ContainmentReactorPlating() {
-        setImage(TextureFactory.getImage(imageFilename));
+        setImage(TextureFactory.getImage(IMAGEFILENAME));
     }
     
     /**

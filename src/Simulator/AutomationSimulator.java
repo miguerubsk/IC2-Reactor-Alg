@@ -45,7 +45,7 @@ public class AutomationSimulator extends SwingWorker<Void, String> {
     
     private int nextOnTime = 0;
     
-    private MaterialsList replacedItems = new MaterialsList();
+    private final MaterialsList replacedItems = new MaterialsList();
     
     public AutomationSimulator(final Reactor reactor, final JTextArea output, final JPanel[][] reactorButtonPanels, final int initialHeat, 
             final int onPulseDuration, final int offPulseDuration, final int suspendTemp, final int resumeTemp) {
@@ -334,7 +334,7 @@ public class AutomationSimulator extends SwingWorker<Void, String> {
     @Override
     protected void process(List<String> chunks) {
         if (!isCancelled()) {
-            for (String chunk : chunks) {
+            chunks.forEach(chunk -> {
                 if (chunk.isEmpty()) {
                     output.setText("");
                 } else {
@@ -359,7 +359,7 @@ public class AutomationSimulator extends SwingWorker<Void, String> {
                         output.append(chunk);
                     }
                 }
-            }
+            });
         }
     }
     

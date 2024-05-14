@@ -9,7 +9,7 @@ public class CoolantCell60k extends ReactorComponent {
     /**
      * The filename for the image to show for the component.
      */
-    private static final String imageFilename = "reactorCoolantSix.png";    
+    private static final String IMAGEFILENAME = "reactorCoolantSix.png";    
     
     public static final MaterialsList MATERIALS = new MaterialsList(2, CoolantCell30k.MATERIALS, "Iron", 6, "Tin");
     
@@ -17,7 +17,7 @@ public class CoolantCell60k extends ReactorComponent {
      * Creates a new instance.
      */
     public CoolantCell60k() {
-        setImage(TextureFactory.getImage(imageFilename));
+        setImage(TextureFactory.getImage(IMAGEFILENAME));
         setMaxHeat(60000);
         automationThreshold = 54000;
     }

@@ -12,18 +12,18 @@ public class ComponentHeatExchanger extends ReactorComponent {
     /**
      * The filename for the image to show for the component.
      */
-    private static final String imageFilename = "reactorHeatSwitchSpread.png";    
+    private static final String IMAGEFILENAME = "reactorHeatSwitchSpread.png";    
     
     public static final MaterialsList MATERIALS = new MaterialsList(HeatExchanger.MATERIALS, 4, "Gold");
     
-    private static final int switchSide = 36;
-    private static final int switchReactor = 0;
+    private static final int SWITCHSIDE = 36;
+    private static final int SWITCHREACTOR = 0;
     
     /**
      * Creates a new instance.
      */
     public ComponentHeatExchanger() {
-        setImage(TextureFactory.getImage(imageFilename));
+        setImage(TextureFactory.getImage(IMAGEFILENAME));
         setMaxHeat(5000);
         automationThreshold = 4500;
     }
@@ -73,17 +73,17 @@ public class ComponentHeatExchanger extends ReactorComponent {
             double heatablemed = heatableNeighbor.getCurrentHeat() * 100.0 / heatableNeighbor.getMaxHeat();
 
             double add = (int) (heatableNeighbor.getMaxHeat() / 100.0 * (heatablemed + mymed / 2.0));
-            if (add > switchSide) {
-                add = switchSide;
+            if (add > SWITCHSIDE) {
+                add = SWITCHSIDE;
             }
             if (heatablemed + mymed / 2.0 < 1.0) {
-                add = switchSide / 2;
+                add = SWITCHSIDE / 2;
             }
             if (heatablemed + mymed / 2.0 < 0.75) {
-                add = switchSide / 4;
+                add = SWITCHSIDE / 4;
             }
             if (heatablemed + mymed / 2.0 < 0.5) {
-                add = switchSide / 8;
+                add = SWITCHSIDE / 8;
             }
             if (heatablemed + mymed / 2.0 < 0.25) {
                 add = 1;

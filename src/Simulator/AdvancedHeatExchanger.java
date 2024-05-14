@@ -12,18 +12,18 @@ public class AdvancedHeatExchanger extends ReactorComponent {
     /**
      * The filename for the image to show for the component.
      */
-    private static final String imageFilename = "reactorHeatSwitchDiamond.png";    
+    private static final String IMAGEFILENAME = "reactorHeatSwitchDiamond.png";    
     
     public static final MaterialsList MATERIALS = new MaterialsList(2, HeatExchanger.MATERIALS, 2, MaterialsList.ELECTRONIC_CIRCUIT, "Copper", 4, "Lapis Lazuli");
     
-    private static final int switchSide = 24;
-    private static final int switchReactor = 8;
+    private static final int SWITCHSIDE = 24;
+    private static final int SWITCHREACTOR = 8;
     
     /**
      * Creates a new instance.
      */
     public AdvancedHeatExchanger() {
-        setImage(TextureFactory.getImage(imageFilename));
+        setImage(TextureFactory.getImage(IMAGEFILENAME));
         setMaxHeat(10000);
     }
     
@@ -72,17 +72,17 @@ public class AdvancedHeatExchanger extends ReactorComponent {
             double heatablemed = heatableNeighbor.getCurrentHeat() * 100.0 / heatableNeighbor.getMaxHeat();
 
             double add = (int) (heatableNeighbor.getMaxHeat() / 100.0 * (heatablemed + mymed / 2.0));
-            if (add > switchSide) {
-                add = switchSide;
+            if (add > SWITCHSIDE) {
+                add = SWITCHSIDE;
             }
             if (heatablemed + mymed / 2.0 < 1.0) {
-                add = switchSide / 2;
+                add = SWITCHSIDE / 2;
             }
             if (heatablemed + mymed / 2.0 < 0.75) {
-                add = switchSide / 4;
+                add = SWITCHSIDE / 4;
             }
             if (heatablemed + mymed / 2.0 < 0.5) {
-                add = switchSide / 8;
+                add = SWITCHSIDE / 8;
             }
             if (heatablemed + mymed / 2.0 < 0.25) {
                 add = 1;
@@ -100,17 +100,17 @@ public class AdvancedHeatExchanger extends ReactorComponent {
         double Reactormed = parentReactor.getCurrentHeat() * 100.0 / parentReactor.getMaxHeat();
 
         int add = (int) Math.round(parentReactor.getMaxHeat() / 100.0 * (Reactormed + mymed / 2.0));
-        if (add > switchReactor) {
-            add = switchReactor;
+        if (add > SWITCHREACTOR) {
+            add = SWITCHREACTOR;
         }
         if (Reactormed + mymed / 2.0 < 1.0) {
-            add = switchSide / 2;
+            add = SWITCHSIDE / 2;
         }
         if (Reactormed + mymed / 2.0 < 0.75) {
-            add = switchSide / 4;
+            add = SWITCHSIDE / 4;
         }
         if (Reactormed + mymed / 2.0 < 0.5) {
-            add = switchSide / 8;
+            add = SWITCHSIDE / 8;
         }
         if (Reactormed + mymed / 2.0 < 0.25) {
             add = 1;

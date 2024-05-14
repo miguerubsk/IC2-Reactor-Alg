@@ -59,22 +59,18 @@ public class ReactorPlannerFrame extends javax.swing.JFrame {
                 automationButton.setFont(Font.decode("Arial 10"));
                 automationButton.setMargin(new Insets(-2, 0, -2, 0));
                 automationButton.setToolTipText("Click to define automation rules for this component.");
-                automationButton.addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        final ReactorComponent component = reactor.getComponentAt(finalRow, finalCol);
-                        selectedRow = finalRow;
-                        selectedColumn = finalCol;
-                        if (component == null) {
-                            selectedComponentLabel.setText(String.format("No component at row %d column %d.", finalRow, finalCol));
-                        } else {
-                            selectedComponentLabel.setText(String.format("%s at row %d column %d\n", component.toString(), finalRow, finalCol));
-                            thresholdSpinner.setValue(component.automationThreshold);
-                            pauseSpinner.setValue(component.reactorPause);
-                        }
-                        outputTabs.setSelectedIndex(4);
+                automationButton.addActionListener((final ActionEvent e) -> {
+                    final ReactorComponent component1 = reactor.getComponentAt(finalRow, finalCol);
+                    selectedRow = finalRow;
+                    selectedColumn = finalCol;
+                    if (component1 == null) {
+                        selectedComponentLabel.setText(String.format("No component at row %d column %d.", finalRow, finalCol));
+                    } else {
+                        selectedComponentLabel.setText(String.format("%s at row %d column %d\n", component1.toString(), finalRow, finalCol));
+                        thresholdSpinner.setValue(component1.automationThreshold);
+                        pauseSpinner.setValue(component1.reactorPause);
                     }
+                    outputTabs.setSelectedIndex(4);
                 });
                 reactorButtonPanels[row][col].add(automationButton, constraints);
                 reactorButtonPanels[row][col].add(new JLabel(), constraints);
@@ -83,22 +79,18 @@ public class ReactorPlannerFrame extends javax.swing.JFrame {
                 JButton infoButton = new JButton("i");
                 infoButton.setFont(Font.decode("Arial 10"));
                 infoButton.setMargin(new Insets(-2, 0, -2, 0));
-                infoButton.addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        if (simulatedReactor != null) {
-                            final ReactorComponent component = simulatedReactor.getComponentAt(finalRow, finalCol);
-                            if (component == null) {
-                                componentArea.setText(String.format("No component at row %d column %d during last simulation.", finalRow, finalCol));
-                            } else {
-                                componentArea.setText(String.format("%s at row %d column %d\n%s", component.toString(), finalRow, finalCol, component.info));
-                            }
+                infoButton.addActionListener((final ActionEvent e) -> {
+                    if (simulatedReactor != null) {
+                        final ReactorComponent component1 = simulatedReactor.getComponentAt(finalRow, finalCol);
+                        if (component1 == null) {
+                            componentArea.setText(String.format("No component at row %d column %d during last simulation.", finalRow, finalCol));
                         } else {
-                            componentArea.setText("No simulation run yet.");
+                            componentArea.setText(String.format("%s at row %d column %d\n%s", component1.toString(), finalRow, finalCol, component1.info));
                         }
-                        outputTabs.setSelectedIndex(2);
+                    } else {
+                        componentArea.setText("No simulation run yet.");
                     }
+                    outputTabs.setSelectedIndex(2);
                 });
                 infoButton.setToolTipText("Click for information about this component");
                 reactorButtonPanels[row][col].add(infoButton, constraints);
@@ -107,44 +99,40 @@ public class ReactorPlannerFrame extends javax.swing.JFrame {
                 constraints.fill = GridBagConstraints.BOTH;
                 constraints.gridwidth = GridBagConstraints.REMAINDER;
                 reactorButtons[row][col] = new JButton();
-                reactorButtons[row][col].addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        ReactorComponent componentToPlace = null;
-                        final ButtonModel selection = componentsGroup.getSelection();
-                        if (selection != null) {
-                            componentToPlace = ComponentFactory.createComponent(selection.getActionCommand());
-                            if (componentToPlace != null) {
-                                componentToPlace.setInitialHeat(((Number)componentHeatSpinner.getValue()).intValue());
-                            }
+                reactorButtons[row][col].addActionListener((ActionEvent e) -> {
+                    ReactorComponent componentToPlace = null;
+                    final ButtonModel selection = componentsGroup.getSelection();
+                    if (selection != null) {
+                        componentToPlace = ComponentFactory.createComponent(selection.getActionCommand());
+                        if (componentToPlace != null) {
+                            componentToPlace.setInitialHeat(((Number)componentHeatSpinner.getValue()).intValue());
                         }
-                        reactor.setComponentAt(finalRow, finalCol, componentToPlace);
-                        materialsArea.setText(reactor.getMaterials().toString());
-                        maxHeatLabel.setText(String.format("/%,.0f", reactor.getMaxHeat()));
-                        temperatureEffectsLabel.setText(String.format("Burn: %,d  Evaporate: %,d  Hurt: %,d  Lava: %,d  Explode: %,d", (int) (reactor.getMaxHeat() * 0.4), (int) (reactor.getMaxHeat() * 0.5), (int) (reactor.getMaxHeat() * 0.7), (int) (reactor.getMaxHeat() * 0.85), (int) (reactor.getMaxHeat() * 1.0)));
-                        SpinnerModel model = heatSpinner.getModel();
-                        if (model instanceof SpinnerNumberModel) {
-                            ((SpinnerNumberModel)model).setMaximum(reactor.getMaxHeat());
-                        }
-                        int buttonSize = Math.min(reactorButtons[finalRow][finalCol].getWidth(), reactorButtons[finalRow][finalCol].getHeight());
-                        if (buttonSize > 2 && componentToPlace != null) {
-                            reactorButtons[finalRow][finalCol].setIcon(new ImageIcon(componentToPlace.getImage().getScaledInstance(buttonSize * 8 / 10, buttonSize * 8 / 10, Image.SCALE_FAST)));
-                            reactorButtons[finalRow][finalCol].setToolTipText(componentToPlace.toString());
-                            reactorButtons[finalRow][finalCol].setBackground(Color.LIGHT_GRAY);
-                        } else {
-                            reactorButtons[finalRow][finalCol].setIcon(null);
-                            if (componentToPlace != null) {
-                                reactorButtons[finalRow][finalCol].setToolTipText(componentToPlace.toString());
-                            } else {
-                                reactorButtons[finalRow][finalCol].setToolTipText(null);
-                            }
-                            reactorButtons[finalRow][finalCol].setBackground(Color.LIGHT_GRAY);
-                        }
-                        changingCode = true;
-                        codeField.setText(reactor.getCode());
-                        changingCode = false;
                     }
+                    reactor.setComponentAt(finalRow, finalCol, componentToPlace);
+                    materialsArea.setText(reactor.getMaterials().toString());
+                    maxHeatLabel.setText(String.format("/%,.0f", reactor.getMaxHeat()));
+                    temperatureEffectsLabel.setText(String.format("Burn: %,d  Evaporate: %,d  Hurt: %,d  Lava: %,d  Explode: %,d", (int) (reactor.getMaxHeat() * 0.4), (int) (reactor.getMaxHeat() * 0.5), (int) (reactor.getMaxHeat() * 0.7), (int) (reactor.getMaxHeat() * 0.85), (int) (reactor.getMaxHeat() * 1.0)));
+                    SpinnerModel model = heatSpinner.getModel();
+                    if (model instanceof SpinnerNumberModel) {
+                        ((SpinnerNumberModel)model).setMaximum(reactor.getMaxHeat());
+                    }
+                    int buttonSize = Math.min(reactorButtons[finalRow][finalCol].getWidth(), reactorButtons[finalRow][finalCol].getHeight());
+                    if (buttonSize > 2 && componentToPlace != null) {
+                        reactorButtons[finalRow][finalCol].setIcon(new ImageIcon(componentToPlace.getImage().getScaledInstance(buttonSize * 8 / 10, buttonSize * 8 / 10, Image.SCALE_FAST)));
+                        reactorButtons[finalRow][finalCol].setToolTipText(componentToPlace.toString());
+                        reactorButtons[finalRow][finalCol].setBackground(Color.LIGHT_GRAY);
+                    } else {
+                        reactorButtons[finalRow][finalCol].setIcon(null);
+                        if (componentToPlace != null) {
+                            reactorButtons[finalRow][finalCol].setToolTipText(componentToPlace.toString());
+                        } else {
+                            reactorButtons[finalRow][finalCol].setToolTipText(null);
+                        }
+                        reactorButtons[finalRow][finalCol].setBackground(Color.LIGHT_GRAY);
+                    }
+                    changingCode = true;
+                    codeField.setText(reactor.getCode());
+                    changingCode = false;
                 });
 
                 reactorButtons[row][col].addMouseListener(new MouseAdapter() {
@@ -956,55 +944,55 @@ public class ReactorPlannerFrame extends javax.swing.JFrame {
         simulatedReactor.setCode(reactor.getCode());
         simulatedReactor.setFluid(reactor.isFluid());
         outputTabs.setSelectedIndex(0);
-        if ("Simple Cycle".equals(simulationStyleCombo.getSelectedItem().toString())) {
-            //simulator = new SimpleSimulator(simulatedReactor, outputArea, reactorButtonPanels, initialHeat);
-            simulator.execute();
-        } else if ("Pulsed Cycle".equals(simulationStyleCombo.getSelectedItem().toString())) {
-            int onPulseDuration = 30;
-            int offPulseDuration = 30;
-            int suspendTemp = 8400;
-            int resumeTemp = 0;
-            value = onPulseSpinner.getValue();
-            if (value instanceof Number) {
-                onPulseDuration = ((Number) value).intValue();
-            }
-            value = offPulseSpinner.getValue();
-            if (value instanceof Number) {
-                offPulseDuration = ((Number) value).intValue();
-            }
-            value = suspendTempSpinner.getValue();
-            if (value instanceof Number) {
-                suspendTemp = ((Number) value).intValue();
-            }
-            value = resumeTempSpinner.getValue();
-            if (value instanceof Number) {
-                resumeTemp = ((Number) value).intValue();
-            }
-            simulator = new PulsedSimulator(simulatedReactor, outputArea, reactorButtonPanels, initialHeat, onPulseDuration, offPulseDuration, suspendTemp, resumeTemp);
-            simulator.execute();
-        } else if ("Pulsed Automation".equals(simulationStyleCombo.getSelectedItem().toString())) {
-            int onPulseDuration = 30;
-            int offPulseDuration = 30;
-            int suspendTemp = 8400;
-            int resumeTemp = 0;
-            value = onPulseSpinner.getValue();
-            if (value instanceof Number) {
-                onPulseDuration = ((Number) value).intValue();
-            }
-            value = offPulseSpinner.getValue();
-            if (value instanceof Number) {
-                offPulseDuration = ((Number) value).intValue();
-            }
-            value = suspendTempSpinner.getValue();
-            if (value instanceof Number) {
-                suspendTemp = ((Number) value).intValue();
-            }
-            value = resumeTempSpinner.getValue();
-            if (value instanceof Number) {
-                resumeTemp = ((Number) value).intValue();
-            }
-            simulator = new AutomationSimulator(simulatedReactor, outputArea, reactorButtonPanels, initialHeat, onPulseDuration, offPulseDuration, suspendTemp, resumeTemp);
-            simulator.execute();
+        if (null != simulationStyleCombo.getSelectedItem().toString()) switch (simulationStyleCombo.getSelectedItem().toString()) {
+            case "Simple Cycle":
+                //simulator = new SimpleSimulator(simulatedReactor, outputArea, reactorButtonPanels, initialHeat);
+                simulator.execute();
+                break;
+            case "Pulsed Cycle":{
+                int onPulseDuration = 30;
+                int offPulseDuration = 30;
+                int suspendTemp = 8400;
+                int resumeTemp = 0;
+                value = onPulseSpinner.getValue();
+                if (value instanceof Number) {
+                    onPulseDuration = ((Number) value).intValue();
+                }       value = offPulseSpinner.getValue();
+                if (value instanceof Number) {
+                    offPulseDuration = ((Number) value).intValue();
+                }       value = suspendTempSpinner.getValue();
+                if (value instanceof Number) {
+                    suspendTemp = ((Number) value).intValue();
+                }       value = resumeTempSpinner.getValue();
+                if (value instanceof Number) {
+                    resumeTemp = ((Number) value).intValue();
+                }       simulator = new PulsedSimulator(simulatedReactor, outputArea, reactorButtonPanels, initialHeat, onPulseDuration, offPulseDuration, suspendTemp, resumeTemp);
+                simulator.execute();
+                    break;
+                }
+            case "Pulsed Automation":{
+                int onPulseDuration = 30;
+                int offPulseDuration = 30;
+                int suspendTemp = 8400;
+                int resumeTemp = 0;
+                value = onPulseSpinner.getValue();
+                if (value instanceof Number) {
+                    onPulseDuration = ((Number) value).intValue();
+                }       value = offPulseSpinner.getValue();
+                if (value instanceof Number) {
+                    offPulseDuration = ((Number) value).intValue();
+                }       value = suspendTempSpinner.getValue();
+                if (value instanceof Number) {
+                    suspendTemp = ((Number) value).intValue();
+                }       value = resumeTempSpinner.getValue();
+                if (value instanceof Number) {
+                    resumeTemp = ((Number) value).intValue();
+                }       simulator = new AutomationSimulator(simulatedReactor, outputArea, reactorButtonPanels, initialHeat, onPulseDuration, offPulseDuration, suspendTemp, resumeTemp);
+                simulator.execute();
+                    break;
+                }
+            default:
+                break;
         }
         
     }//GEN-LAST:event_simulateButtonActionPerformed
@@ -1089,12 +1077,8 @@ public class ReactorPlannerFrame extends javax.swing.JFrame {
     public static void main(final String args[]) {
 
         /* Create and display the form */
-        SwingUtilities.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
+        SwingUtilities.invokeLater(() -> {
             new ReactorPlannerFrame().setVisible(true);
-            }
         });
     }
 
