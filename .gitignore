@@ -42,3 +42,4 @@ nbdist/
 *.bat
 *.sh
 /IC2-Reactor-Alg
+result.txt
