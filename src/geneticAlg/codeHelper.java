@@ -100,11 +100,12 @@ public class codeHelper {
         {"iridiumNeutronReflector", new IridiumNeutronReflector()},};
 
     private ArrayList<String> createIDs() {
-        
+
         ArrayList<String> result = new ArrayList<>();
         for (int i = 1; i < components.length; i++) {
 
             result.add(String.format("%02X", i));
+            System.err.println(String.format("%02X", i));
 
         }
         return result;
@@ -146,7 +147,7 @@ public class codeHelper {
                 sb.append(getRandomID());
                 i++;
             } else {
-                sb.append(code.charAt(i));
+                if( i < code.length()) sb.append(code.charAt(i));
             }
         }
         return sb.toString();
@@ -189,19 +190,60 @@ public class codeHelper {
 
         StringBuilder sb = new StringBuilder(108);
 
-        for (int i = 0; i < 108; i++) {
-            if (i >= pos1 && i <= pos2) {
-                sb.append(code2.charAt(i));
-            }
+        if (rnd.nextBoolean()) {
+            for (int i = 0; i < 108; i++) {
+                if (i >= pos1 && i <= pos2) {
+                    sb.append(code2.charAt(i));
+                }
 
-            if (i < pos1) {
-                sb.append(code1.charAt(i));
-            }
+                if (i < pos1) {
+                    sb.append(code1.charAt(i));
+                }
 
-            if (i > pos2) {
-                sb.append(code2.charAt(i));
+                if (i > pos2) {
+                    sb.append(code2.charAt(i));
+                }
+            }
+        } else {
+            for (int i = 0; i < 108; i++) {
+                if (i >= pos1 && i <= pos2) {
+                    sb.append(code1.charAt(i));
+                }
+
+                if (i < pos1) {
+                    sb.append(code2.charAt(i));
+                }
+
+                if (i > pos2) {
+                    sb.append(code1.charAt(i));
+                }
             }
         }
+
         return sb.toString();
     }
+    
+    public String uniformCrossover(String code1, String code2){
+        StringBuilder sb = new StringBuilder(108);
+        
+        for (int i = 0; i < 108; i += 2){
+            if(code1.charAt(i) != code2.charAt(i) && code1.charAt(i+1) != code2.charAt(i+1) && rnd.nextBoolean()){
+                if(rnd.nextBoolean()){
+                    sb.append(code1.charAt(i)).append(code1.charAt(i+1));
+                }else{
+                    sb.append(code2.charAt(i)).append(code2.charAt(i+1));
+                }
+            }else{
+                if(rnd.nextBoolean()){
+                    sb.append(code2.charAt(i)).append(code2.charAt(i+1));
+                }else{
+                    sb.append(code1.charAt(i)).append(code1.charAt(i+1));
+                }
+            }
+        }
+        
+        return sb.toString();
+    } 
 }
+
+//O(n)
