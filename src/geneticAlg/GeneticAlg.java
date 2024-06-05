@@ -170,9 +170,17 @@ public class GeneticAlg {
                 String childCode;
 
                 if (rnd.nextBoolean()) {
-                    childCode = ch.onePointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
+                    
+                    if(rnd.nextBoolean()){
+                        System.out.println("Using 1PX");
+                        childCode = ch.twoPointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
+                    }else{
+                        System.out.println("Using 2PX");
+                        childCode = ch.onePointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
+                    }
                 } else {
-                    childCode = ch.twoPointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
+                    System.out.println("Using UX");
+                    childCode = ch.uniformCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
                 }
 
                 int proc = rnd.nextInt(1000000);
