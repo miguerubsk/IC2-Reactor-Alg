@@ -140,11 +140,11 @@ public class GeneticAlg {
                 lastImproved++;
             }
             
-//            if(lastImproved >= MAX_GENREATIONS_WITHOUT_IMPROVEMENT) {
-//                System.out.println(lastImproved + " generations without improvement. Restarting population.");
+            if(lastImproved >= MAX_GENREATIONS_WITHOUT_IMPROVEMENT) {
+                System.out.println(lastImproved + " generations without improvement. Restarting population.");
 //                resetPopulation();
 //                lastImproved = 0;
-//            }
+            }
 
             ArrayList<ReactorEntity> newPop = new ArrayList<>(POPULATION_SIZE);
 
