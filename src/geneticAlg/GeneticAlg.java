@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import tools.MergeSort;
 
 /**
  *
@@ -39,6 +40,7 @@ public class GeneticAlg {
 
     private ReactorEntity best, BEST;
     private ArrayList<ReactorEntity> population;
+    private MergeSort sort;
 
     /**
      *
@@ -102,6 +104,7 @@ public class GeneticAlg {
             MAX_GENREATIONS_WITHOUT_IMPROVEMENT = 50;
         }
 
+        sort = new MergeSort();
         ch = new codeHelper();
         rnd = new Random(System.currentTimeMillis());
         best = new ReactorEntity(ch.getRandomCode());
@@ -111,8 +114,8 @@ public class GeneticAlg {
         }
         best.calculateFitness();
     }
-    
-    private void resetPopulation(){
+
+    private void resetPopulation() {
         for (int i = 0; i < POPULATION_SIZE; i++) {
             population.add(new ReactorEntity(ch.getRandomCode()));
         }
@@ -122,25 +125,25 @@ public class GeneticAlg {
      *
      */
     public void run() {
-        
+
         int lastImproved = 0;
 
         for (int k = 0; k < GENERATIONS; k++) {
 
             population.stream().parallel().forEach(ReactorEntity::calculateFitness);
 
-            Collections.sort(population);
+            sort.mergesort(population, 0, population.size() - 1);
 
             if (population.get(0).fitness > best.fitness) {
                 lastImproved = 0;
                 best = new ReactorEntity(population.get(0).reactor.getCode());
                 best.calculateFitness();
                 System.out.printf("Found new best! %f\n", best.fitness);
-            }else{
+            } else {
                 lastImproved++;
             }
-            
-            if(lastImproved >= MAX_GENREATIONS_WITHOUT_IMPROVEMENT) {
+
+            if (lastImproved >= MAX_GENREATIONS_WITHOUT_IMPROVEMENT) {
                 System.out.println(lastImproved + " generations without improvement. Restarting population.");
 //                resetPopulation();
 //                lastImproved = 0;
@@ -164,22 +167,21 @@ public class GeneticAlg {
                     tournament1.add(population.get(rnd.nextInt(POPULATION_SIZE)));
                     tournament2.add(population.get(rnd.nextInt(POPULATION_SIZE)));
                 }
-                Collections.sort(tournament1);
-                Collections.sort(tournament2);
-
+                sort.mergesort(tournament1, 0, tournament1.size() - 1);
+                sort.mergesort(tournament2, 0, tournament2.size() - 1);
                 String childCode;
 
                 if (rnd.nextBoolean()) {
-                    
-                    if(rnd.nextBoolean()){
-                        System.out.println("Using 1PX");
+
+                    if (rnd.nextBoolean()) {
+//                        System.out.println("Using 1PX");
                         childCode = ch.twoPointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
-                    }else{
-                        System.out.println("Using 2PX");
+                    } else {
+//                        System.out.println("Using 2PX");
                         childCode = ch.onePointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
                     }
                 } else {
-                    System.out.println("Using UX");
+//                    System.out.println("Using UX");
                     childCode = ch.uniformCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
                 }
 
@@ -204,10 +206,10 @@ public class GeneticAlg {
                 file.delete();
                 file.createNewFile();
             }
-            
+
             try (FileWriter fileWriter = new FileWriter("result.txt")) {
                 PrintWriter pw = new PrintWriter(fileWriter);
-                
+
                 pw.write("Best found(" + best.fitness + ") reactor was: " + best.reactor.getCode());
             }
 
