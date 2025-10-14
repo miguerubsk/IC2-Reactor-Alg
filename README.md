@@ -8,6 +8,8 @@
 		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg"><img src="https://img.shields.io/github/license/miguerubsk/IC2-Reactor-Alg" alt="License"></a>
 		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg/issues"><img src="https://img.shields.io/github/issues/miguerubsk/IC2-Reactor-Alg" alt="Issues"></a>
 		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg/stargazers"><img src="https://img.shields.io/github/stars/miguerubsk/IC2-Reactor-Alg" alt="Stars"></a>
+		<br>
+		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/codeql.yml"><img src="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/codeql.yml/badge.svg"></a>
 	</p>
 </div>
 
