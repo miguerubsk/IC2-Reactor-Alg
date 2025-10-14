@@ -1,5 +1,5 @@
 <div align="center">
-	<img src="https://raw.githubusercontent.com/miguerubsk/IC2-Reactor-Alg/master/.github/assets/logo.png" alt="IC2 Reactor Alg Logo" width="120" />
+	<!--<img src="https://raw.githubusercontent.com/miguerubsk/IC2-Reactor-Alg/master/.github/assets/logo.png" alt="IC2 Reactor Alg Logo" width="120" /> -->
 	<h1>IC2 Reactor Alg</h1>
 	<p>
 		Algoritmo evolutivo para crear diseños de reactores nucleares en el mod IndustrialCraft 2 de Minecraft.
@@ -47,7 +47,7 @@ IC2-Reactor-Alg/
    ```
 2. Compila el proyecto (requiere JDK):
    ```sh
-   javac -d bin src/Main/IC2ReactorAlg.java
+   javac -d bin $(find src -name "*.java")
    ```
 3. Ejecuta el algoritmo:
    ```sh
