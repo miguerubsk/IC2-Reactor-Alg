@@ -9,7 +9,10 @@
 		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg/issues"><img src="https://img.shields.io/github/issues/miguerubsk/IC2-Reactor-Alg" alt="Issues"></a>
 		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg/stargazers"><img src="https://img.shields.io/github/stars/miguerubsk/IC2-Reactor-Alg" alt="Stars"></a>
 		<br>
-		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/codeql.yml"><img src="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/codeql.yml/badge.svg"></a>
+		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/codeql.yml"><img src="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/codeql.yml/badge.svg" alt="CodeQL Advanced"></a>
+		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/build.yml"><img src="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/build.yml/badge.svg" alt="Build"></a>
+
+		[![Java CI](https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/build.yml/badge.svg)](https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/build.yml)
 	</p>
 </div>
 
