@@ -11,6 +11,7 @@
 		<br>
 		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/codeql.yml"><img src="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/codeql.yml/badge.svg" alt="CodeQL Advanced"></a>
 		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/build.yml"><img src="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/build.yml/badge.svg" alt="Build"></a>
+		<a href="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/run.yml"><img src="https://github.com/miguerubsk/IC2-Reactor-Alg/actions/workflows/run.yml/badge.svg" alt"Algorith execution"></a>
 	</p>
 </div>
 
