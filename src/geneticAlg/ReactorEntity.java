@@ -25,7 +25,7 @@ import Simulator.ReactorComponent;
  */
 public class ReactorEntity implements Comparable<ReactorEntity> {
 
-    public final Reactor reactor = new Reactor();
+    public final Reactor reactor;
 
     public final boolean[][] alreadyBroken = new boolean[6][9];
 
@@ -62,16 +62,17 @@ public class ReactorEntity implements Comparable<ReactorEntity> {
     boolean reachedExplode = false;
 
     /**
-     * 
-     * @param code 
+     *
+     * @param code
      */
     public ReactorEntity(String code) {
+        this.reactor = new Reactor();
         reactor.setCode(code);
         this.code = code;
     }
 
     /**
-     * 
+     *
      */
     public void calculateFitness() {
 
@@ -122,7 +123,7 @@ public class ReactorEntity implements Comparable<ReactorEntity> {
     }
 
     /**
-     * 
+     *
      */
     private void runSimulation() {
         long startTime = System.nanoTime();
@@ -283,12 +284,19 @@ public class ReactorEntity implements Comparable<ReactorEntity> {
     }
 
     /**
-     * 
+     *
      * @param o
-     * @return 
+     * @return
      */
     @Override
     public int compareTo(ReactorEntity o) {
-        return (int) (o.fitness - this.fitness);
+//        return (int) (o.fitness - this.fitness);
+        if (o.fitness < this.fitness) {
+            return -1;
+        }
+        if (o.fitness < this.fitness) {
+            return 0;
+        }
+        return 1;
     }
 }
