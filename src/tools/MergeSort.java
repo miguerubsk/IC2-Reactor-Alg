@@ -43,7 +43,7 @@ public class MergeSort {
         boolean entra = true;
         for (i = ini; i < fin && entra; i++) {
             entra = false;
-            for (j = ini; j < fin; j++) {
+            for (j = ini; j < fin - 1; j++) {
                 if (T.get(j).fitness > T.get(j + 1).fitness) {
                     aux = T.get(j);
                     T.set(j, T.get(j + 1));
@@ -68,25 +68,25 @@ public class MergeSort {
         y = centro + 1;
         z = 0;
 
-        while ((x <= v1.size()) && (y <= v2.size())) {
+        while ((x < v1.size()) && (y < v2.size())) {
 
             if (v1.get(x).fitness <= v2.get(y).fitness) {
                 aux.set(z, v1.get(x));
                 x++;
             } else {
-                aux.set(z, v2.get(y));
+                aux.add(v2.get(y));
                 y++;
             }
             z++;
         }
 
-        while (x <= v1.size()) {
+        while (x < v1.size()) {
             aux.set(z, v1.get(x));
             x++;
             z++;
         }
 
-        while (y <= v2.size()) {
+        while (y < v2.size()) {
             aux.set(z, v2.get(z));
             y++;
             z++;
@@ -107,7 +107,7 @@ public class MergeSort {
      * @param fin
      */
     public void mergesort(ArrayList<ReactorEntity> v, int ini, int fin) {
-        if (v.size() + 1 <= UMBRAL) {
+        if ((fin - ini) <= UMBRAL) {
             burbujaMejorado(v, ini, fin);
         } else {
             
