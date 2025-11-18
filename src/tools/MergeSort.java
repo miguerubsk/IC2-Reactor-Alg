@@ -19,33 +19,22 @@ package tools;
 import geneticAlg.ReactorEntity;
 import java.util.ArrayList;
 
-/**
- *
- * @author Miguel González García
- */
 public class MergeSort {
 
     private final int UMBRAL = 2;
 
-    public MergeSort() {
-    }
-    
+    public MergeSort() {}
 
     /**
-     *
-     * @param T
-     * @param ini
-     * @param fin
+     * Ordenación burbuja mejorada para segmentos pequeños
      */
     private void burbujaMejorado(ArrayList<ReactorEntity> T, int ini, int fin) {
-        int i, j;
-        ReactorEntity aux;
         boolean entra = true;
-        for (i = ini; i < fin && entra; i++) {
+        for (int i = ini; i < fin && entra; i++) {
             entra = false;
-            for (j = ini; j < fin - 1; j++) {
+            for (int j = ini; j < fin - 1; j++) {
                 if (T.get(j).fitness > T.get(j + 1).fitness) {
-                    aux = T.get(j);
+                    ReactorEntity aux = T.get(j);
                     T.set(j, T.get(j + 1));
                     T.set(j + 1, aux);
                     entra = true;
@@ -55,74 +44,52 @@ public class MergeSort {
     }
 
     /**
-     *
-     * @param v
-     * @param ini
-     * @param fin
-     * @param centro
+     * Combina dos listas ordenadas en una sola
      */
-    private void merge(ArrayList<ReactorEntity> v1, ArrayList<ReactorEntity> v2, int centro) {
-        int x, y, z;
+    private ArrayList<ReactorEntity> merge(ArrayList<ReactorEntity> v1, ArrayList<ReactorEntity> v2) {
         ArrayList<ReactorEntity> aux = new ArrayList<>();
-        x = 0;
-        y = centro + 1;
-        z = 0;
+        int x = 0, y = 0;
 
-        while ((x < v1.size()) && (y < v2.size())) {
-
+        // Mezclar mientras haya elementos en ambas listas
+        while (x < v1.size() && y < v2.size()) {
             if (v1.get(x).fitness <= v2.get(y).fitness) {
-                aux.set(z, v1.get(x));
+                aux.add(v1.get(x));
                 x++;
             } else {
                 aux.add(v2.get(y));
                 y++;
             }
-            z++;
         }
 
+        // Añadir los restantes de v1
         while (x < v1.size()) {
-            aux.set(z, v1.get(x));
+            aux.add(v1.get(x));
             x++;
-            z++;
         }
 
+        // Añadir los restantes de v2
         while (y < v2.size()) {
-            aux.set(z, v2.get(z));
+            aux.add(v2.get(y));
             y++;
-            z++;
         }
 
-        z = 0;
-        for (x = 0; x <= v2.size(); x++) {
-            v1.set(x, aux.get(z));
-            z++;
-        }
-
+        return aux;
     }
 
     /**
-     *
-     * @param v
-     * @param ini
-     * @param fin
+     * Ordenación por mergesort
      */
-    public void mergesort(ArrayList<ReactorEntity> v, int ini, int fin) {
+    public ArrayList<ReactorEntity> mergesort(ArrayList<ReactorEntity> v, int ini, int fin) {
         if ((fin - ini) <= UMBRAL) {
             burbujaMejorado(v, ini, fin);
+            return new ArrayList<>(v.subList(ini, fin));
         } else {
-            
             int centro = ini + ((fin - ini) / 2);
-            
-            ArrayList<ReactorEntity> v1 = new ArrayList<>();
-            ArrayList<ReactorEntity> v2 = new ArrayList<>();
-            
-            v1.addAll(v.subList(ini, centro));
-            v2.addAll(v.subList(centro, fin));
-            
-            mergesort(v1, ini, centro);
-            mergesort(v2, centro + 1, fin);
 
-            merge(v1, v2, centro);
+            ArrayList<ReactorEntity> v1 = mergesort(new ArrayList<>(v.subList(ini, centro)), 0, centro - ini);
+            ArrayList<ReactorEntity> v2 = mergesort(new ArrayList<>(v.subList(centro, fin)), 0, fin - centro);
+
+            return merge(v1, v2);
         }
     }
 }
