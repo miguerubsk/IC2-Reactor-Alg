@@ -115,8 +115,16 @@ public class GeneticAlg {
         best.calculateFitness();
     }
 
+    /**
+     * Reinicia la población manteniendo únicamente al mejor individuo histórico.
+     */
     private void resetPopulation() {
-        for (int i = 0; i < POPULATION_SIZE; i++) {
+        population.clear();
+        // Preservamos al mejor individuo global
+        population.add(new ReactorEntity(best.reactor.getCode()));
+        
+        // El resto se genera aleatoriamente
+        for (int i = 1; i < POPULATION_SIZE; i++) {
             population.add(new ReactorEntity(ch.getRandomCode()));
         }
     }
@@ -143,10 +151,13 @@ public class GeneticAlg {
                 lastImproved++;
             }
 
+            // Si se alcanza el límite sin mejoras, se reinicia la población y se salta el cruce en esta iteración
             if (lastImproved >= MAX_GENREATIONS_WITHOUT_IMPROVEMENT) {
                 System.out.println(lastImproved + " generations without improvement. Restarting population.");
-//                resetPopulation();
-//                lastImproved = 0;
+                resetPopulation();
+                lastImproved = 0;
+                System.out.printf("Just finished generation %d of %d with best fitness of %f, code: %s\n", k, GENERATIONS, population.get(0).fitness, population.get(0).reactor.getCode());
+                continue; 
             }
 
             ArrayList<ReactorEntity> newPop = new ArrayList<>(POPULATION_SIZE);
@@ -174,14 +185,14 @@ public class GeneticAlg {
                 if (rnd.nextBoolean()) {
 
                     if (rnd.nextBoolean()) {
-//                        System.out.println("Using 1PX");
+//                      System.out.println("Using 1PX");
                         childCode = ch.twoPointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
                     } else {
-//                        System.out.println("Using 2PX");
+//                      System.out.println("Using 2PX");
                         childCode = ch.onePointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
                     }
                 } else {
-//                    System.out.println("Using UX");
+//                  System.out.println("Using UX");
                     childCode = ch.uniformCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
                 }
 
