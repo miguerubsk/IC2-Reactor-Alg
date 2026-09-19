@@ -68,10 +68,13 @@ Edita el archivo `config.txt` para ajustar parámetros como:
 
 - `POPULATION_SIZE`: Tamaño de la población
 - `TOURNAMENT_SIZE`: Tamaño del torneo
-- `GENERATIONS`: Número de generaciones
+- `GENERATIONS`: Número de generaciones (`0` = sin límite)
 - `FREE_PASS`: Individuos que pasan directo
 - `FRESH_BLOOD`: Individuos nuevos por generación
-- `MUTATION_CHANCE`: Probabilidad de mutación
+- `MUTATION_CHANCE`: Probabilidad de mutación, sobre 1 000 000
+- `MAX_GENERATIONS_WITHOUT_IMPROVEMENT`: Generaciones sin mejora antes de reiniciar la población
+
+Las claves que falten toman su valor por defecto (100, 3, 1000, 1, 15, 70000 y 50). `FREE_PASS + FRESH_BLOOD` no puede superar `POPULATION_SIZE`.
 
 ## 📖 Ejemplo de uso
 
@@ -82,6 +85,7 @@ GENERATIONS = 1000
 FREE_PASS = 1
 FRESH_BLOOD = 15
 MUTATION_CHANCE = 70000
+MAX_GENERATIONS_WITHOUT_IMPROVEMENT = 50
 ```
 
 ## 🛠️ Tecnologías

@@ -16,214 +16,166 @@
  */
 package io.github.miguerubsk.ic2reactoralg.genetic;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 
 /**
+ * Genetic algorithm that searches for the best reactor layout.
  *
  * @author Miguel González García
  */
 public class GeneticAlgorithm {
 
-    private int populationSize, tournamentSize, generations, freePass, freshBlood, mutationChance, maxGenerationsWithoutImprovement; // mutationChance is x in 1 000 000
+    /** Configuration file read from the current working directory. */
+    public static final String CONFIG_FILE = "config.txt";
 
-    private final CodeHelper codeHelper;
+    private final GeneticConfig config;
     private final Random random;
+    private final CodeHelper codeHelper;
 
     private ReactorEntity best;
-    private ArrayList<ReactorEntity> population;
-    private final MergeSort sort;
+    private List<ReactorEntity> population;
 
     /**
-     *
+     * Creates the algorithm using the parameters in {@value #CONFIG_FILE}.
      */
     public GeneticAlgorithm() {
-        try {
-            FileReader fileReader = new FileReader("config.txt");
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String line;
+        this(GeneticConfig.load(Path.of(CONFIG_FILE)), new Random());
+    }
 
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] split = line.split(" = ");
-                switch (split[0]) {
-                    case "POPULATION_SIZE":
-                        this.populationSize = Integer.parseInt(split[1]);
-                        break;
-                    case "TOURNAMENT_SIZE":
-                        this.tournamentSize = Integer.parseInt(split[1]);
-                        break;
-                    case "GENERATIONS":
-                        this.generations = Integer.parseInt(split[1]);
-                        break;
-                    case "FREE_PASS":
-                        this.freePass = Integer.parseInt(split[1]);
-                        break;
-                    case "FRESH_BLOOD":
-                        this.freshBlood = Integer.parseInt(split[1]);
-                        break;
-                    case "MUTATION_CHANCE":
-                        this.mutationChance = Integer.parseInt(split[1]);
-                        break;
-                    case "MAX_GENREATIONS_WITHOUT_IMPROVEMENT":
-                        this.maxGenerationsWithoutImprovement = Integer.parseInt(split[1]);
-                        break;
-                }
-            }
-        } catch (IOException e) {
-            System.err.println(e);
-            System.err.println("Using default config");
-            populationSize = 100;
-            tournamentSize = 3;
-            generations = 1000;
-            freePass = 1;
-            freshBlood = 15;
-            mutationChance = 70000;
-            maxGenerationsWithoutImprovement = 50;
-        }
-
-        if (generations == 0) {
-            generations = Integer.MAX_VALUE;
-        }
-
-        if (freePass == 0 || freshBlood == 0 || mutationChance == 0 || populationSize == 0 || tournamentSize == 0 || maxGenerationsWithoutImprovement == 0) {
-            System.err.println("Using default config");
-            populationSize = 100;
-            tournamentSize = 3;
-            generations = 1000;
-            freePass = 1;
-            freshBlood = 15;
-            mutationChance = 70000;
-            maxGenerationsWithoutImprovement = 50;
-        }
-
-        sort = new MergeSort();
-        codeHelper = new CodeHelper();
-        random = new Random(System.currentTimeMillis());
-        best = new ReactorEntity(codeHelper.getRandomCode());
-        population = new ArrayList<>(populationSize);
-        for (int i = 0; i < populationSize; i++) {
-            population.add(new ReactorEntity(codeHelper.getRandomCode()));
-        }
+    GeneticAlgorithm(GeneticConfig config, Random random) {
+        this.config = config;
+        this.random = random;
+        this.codeHelper = new CodeHelper(random);
+        this.best = randomEntity();
         best.calculateFitness();
+        this.population = randomPopulation(0);
+    }
+
+    private ReactorEntity randomEntity() {
+        return new ReactorEntity(codeHelper.getRandomCode());
     }
 
     /**
-     * Reinicia la población manteniendo únicamente al mejor individuo histórico.
+     * Builds a population of random entities, preceded by the given number of already known good ones.
+     */
+    private List<ReactorEntity> randomPopulation(int alreadyPresent) {
+        List<ReactorEntity> result = new ArrayList<>(config.populationSize());
+        for (int i = alreadyPresent; i < config.populationSize(); i++) {
+            result.add(randomEntity());
+        }
+        return result;
+    }
+
+    /**
+     * Restarts the population, keeping only the best individual found so far.
      */
     private void resetPopulation() {
-        population.clear();
-        // Preservamos al mejor individuo global
-        population.add(new ReactorEntity(best.reactor.getCode()));
-        
-        // El resto se genera aleatoriamente
-        for (int i = 1; i < populationSize; i++) {
-            population.add(new ReactorEntity(codeHelper.getRandomCode()));
-        }
+        List<ReactorEntity> restarted = new ArrayList<>(config.populationSize());
+        restarted.add(best.freshCopy());
+        restarted.addAll(randomPopulation(1));
+        population = restarted;
     }
 
     /**
-     *
+     * Evaluates the whole population and leaves it sorted best first.
      */
-    public void run() {
+    void evaluateAndSort() {
+        population.parallelStream().forEach(ReactorEntity::calculateFitness);
+        Collections.sort(population);
+    }
 
-        int lastImproved = 0;
+    List<ReactorEntity> population() {
+        return population;
+    }
 
-        for (int k = 0; k < generations; k++) {
+    /**
+     * @return the fittest of the given contestants.
+     */
+    static ReactorEntity tournamentWinner(List<ReactorEntity> contestants) {
+        return Collections.min(contestants);
+    }
 
-            population.stream().parallel().forEach(ReactorEntity::calculateFitness);
+    private ReactorEntity selectParent() {
+        List<ReactorEntity> contestants = new ArrayList<>(config.tournamentSize());
+        for (int i = 0; i < config.tournamentSize(); i++) {
+            contestants.add(population.get(random.nextInt(population.size())));
+        }
+        return tournamentWinner(contestants);
+    }
 
-            sort.mergeSort(population, 0, population.size() - 1);
+    private String breedChild() {
+        String parent1 = selectParent().reactor.getCode();
+        String parent2 = selectParent().reactor.getCode();
 
-            if (population.get(0).fitness > best.fitness) {
-                lastImproved = 0;
-                best = new ReactorEntity(population.get(0).reactor.getCode());
+        String child = switch (random.nextInt(4)) {
+            case 0 -> codeHelper.twoPointCrossover(parent1, parent2);
+            case 1 -> codeHelper.onePointCrossover(parent1, parent2);
+            default -> codeHelper.uniformCrossover(parent1, parent2);
+        };
+
+        if (random.nextInt(GeneticConfig.MUTATION_SCALE) < config.mutationChance()) {
+            child = codeHelper.mutateGene(child);
+        }
+        return child;
+    }
+
+    /**
+     * Builds the next generation from the (already sorted) current population.
+     */
+    private List<ReactorEntity> nextGeneration() {
+        List<ReactorEntity> next = new ArrayList<>(config.populationSize());
+
+        for (int i = 0; i < config.freePass(); i++) {
+            next.add(population.get(i).freshCopy());
+        }
+        for (int i = 0; i < config.freshBlood(); i++) {
+            next.add(randomEntity());
+        }
+        while (next.size() < config.populationSize()) {
+            next.add(new ReactorEntity(breedChild()));
+        }
+        return next;
+    }
+
+    /**
+     * Runs the algorithm for the configured number of generations.
+     *
+     * @return the best individual found.
+     */
+    public ReactorEntity run() {
+        int generationsWithoutImprovement = 0;
+
+        for (int generation = 0; generation < config.generations(); generation++) {
+            evaluateAndSort();
+            ReactorEntity top = population.get(0);
+
+            if (top.fitness > best.fitness) {
+                generationsWithoutImprovement = 0;
+                best = top.freshCopy();
                 best.calculateFitness();
-                System.out.printf("Found new best! %f\n", best.fitness);
+                System.out.printf("Found new best! %f%n", best.fitness);
             } else {
-                lastImproved++;
+                generationsWithoutImprovement++;
             }
 
-            // Si se alcanza el límite sin mejoras, se reinicia la población y se salta el cruce en esta iteración
-            if (lastImproved >= maxGenerationsWithoutImprovement) {
-                System.out.println(lastImproved + " generations without improvement. Restarting population.");
+            System.out.printf("Just finished generation %d of %d with best fitness of %f, code: %s%n",
+                    generation, config.generations(), top.fitness, top.reactor.getCode());
+
+            // With no improvement for too long, restart the population and skip breeding this iteration.
+            if (generationsWithoutImprovement >= config.maxGenerationsWithoutImprovement()) {
+                System.out.println(generationsWithoutImprovement + " generations without improvement. Restarting population.");
                 resetPopulation();
-                lastImproved = 0;
-                System.out.printf("Just finished generation %d of %d with best fitness of %f, code: %s\n", k, generations, population.get(0).fitness, population.get(0).reactor.getCode());
-                continue; 
+                generationsWithoutImprovement = 0;
+                continue;
             }
 
-            ArrayList<ReactorEntity> newPop = new ArrayList<>(populationSize);
-
-            for (int i = 0; i < freePass; i++) {
-                newPop.add(new ReactorEntity(population.get(i).reactor.getCode()));
-            }
-
-            for (int i = 0; i < freshBlood; i++) {
-                newPop.add(new ReactorEntity(codeHelper.getRandomCode()));
-            }
-
-            for (int i = freePass + freshBlood; i < populationSize; i++) {
-                ArrayList<ReactorEntity> tournament1 = new ArrayList<>(tournamentSize);
-                ArrayList<ReactorEntity> tournament2 = new ArrayList<>(tournamentSize);
-
-                for (int j = 0; j < tournamentSize; j++) {
-                    tournament1.add(population.get(random.nextInt(populationSize)));
-                    tournament2.add(population.get(random.nextInt(populationSize)));
-                }
-                sort.mergeSort(tournament1, 0, tournament1.size() - 1);
-                sort.mergeSort(tournament2, 0, tournament2.size() - 1);
-                String childCode;
-
-                if (random.nextBoolean()) {
-
-                    if (random.nextBoolean()) {
-//                      System.out.println("Using 1PX");
-                        childCode = codeHelper.twoPointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
-                    } else {
-//                      System.out.println("Using 2PX");
-                        childCode = codeHelper.onePointCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
-                    }
-                } else {
-//                  System.out.println("Using UX");
-                    childCode = codeHelper.uniformCrossover(tournament1.get(0).reactor.getCode(), tournament2.get(0).reactor.getCode());
-                }
-
-                int proc = random.nextInt(1000000);
-                if (proc < mutationChance) {
-                    childCode = codeHelper.mutateGene(childCode);
-                }
-
-                newPop.add(new ReactorEntity(childCode));
-            }
-            System.out.printf("Just finished generation %d of %d with best fitness of %f, code: %s\n", k, generations, population.get(0).fitness, population.get(0).reactor.getCode());
-            population = newPop;
+            population = nextGeneration();
         }
 
-        System.out.printf("Best found(%f) reactor was: %s", best.fitness, best.reactor.getCode());
-
-        File file = new File("result.txt");
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-            } else {
-                file.delete();
-                file.createNewFile();
-            }
-
-            try (FileWriter fileWriter = new FileWriter("result.txt")) {
-                PrintWriter pw = new PrintWriter(fileWriter);
-
-                pw.write("Best found(" + best.fitness + ") reactor was: " + best.reactor.getCode());
-            }
-
-        } catch (IOException e) {
-            System.err.println(e.toString());
-        }
+        return best;
     }
 }

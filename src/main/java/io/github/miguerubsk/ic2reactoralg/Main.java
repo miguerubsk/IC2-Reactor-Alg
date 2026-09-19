@@ -17,6 +17,10 @@
 package io.github.miguerubsk.ic2reactoralg;
 
 import io.github.miguerubsk.ic2reactoralg.genetic.GeneticAlgorithm;
+import io.github.miguerubsk.ic2reactoralg.genetic.ReactorEntity;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  *
@@ -24,13 +28,20 @@ import io.github.miguerubsk.ic2reactoralg.genetic.GeneticAlgorithm;
  */
 public class Main {
 
+    private static final Path RESULT_FILE = Path.of("result.txt");
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
-        GeneticAlgorithm g = new GeneticAlgorithm();
-        g.run();
+        ReactorEntity best = new GeneticAlgorithm().run();
+
+        System.out.printf("Best found(%f) reactor was: %s%n", best.fitness, best.reactor.getCode());
+        try {
+            Files.writeString(RESULT_FILE, "Best found(" + best.fitness + ") reactor was: " + best.reactor.getCode());
+        } catch (IOException e) {
+            System.err.println("Could not write " + RESULT_FILE + ": " + e);
+        }
     }
 
 }

@@ -18,160 +18,124 @@ package io.github.miguerubsk.ic2reactoralg.genetic;
 
 import io.github.miguerubsk.ic2reactoralg.simulator.ComponentFactory;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
+ * Creates and recombines reactor codes. A code is the concatenation of one gene (two hex characters holding a
+ * component id) per grid cell, so every operator works on whole genes and never splits one in half.
  *
  * @author Miguel González García
  */
 public class CodeHelper {
 
-    private final Random random = new Random(System.currentTimeMillis());
+    /** Hex characters per gene (one grid cell). */
+    public static final int GENE_LENGTH = 2;
 
-    private ArrayList<String> createIds() {
+    /** Number of genes in a code (6 rows x 9 columns). */
+    public static final int GENES = 54;
 
-        ArrayList<String> result = new ArrayList<>();
+    public static final int CODE_LENGTH = GENES * GENE_LENGTH;
+
+    private final Random random;
+    private final List<String> validIds = createIds();
+
+    public CodeHelper(Random random) {
+        this.random = random;
+    }
+
+    private static List<String> createIds() {
+        List<String> result = new ArrayList<>();
         // id 0 is reserved for "empty" (no component); valid ids run from 1 to
-        // ComponentFactory.getComponentCount() - 1, matching the 2-hex-char encoding
-        // used throughout this class.
+        // ComponentFactory.getComponentCount() - 1, matching the 2-hex-char encoding.
         for (int i = 1; i < ComponentFactory.getComponentCount(); i++) {
-
             result.add(String.format("%02X", i));
         }
         return result;
     }
 
-    private final ArrayList<String> validIds = createIds();
+    private static String gene(String code, int index) {
+        return code.substring(index * GENE_LENGTH, (index + 1) * GENE_LENGTH);
+    }
+
+    private static void requireValidCode(String code) {
+        if (code.length() != CODE_LENGTH) {
+            throw new IllegalArgumentException("Expected a code of " + CODE_LENGTH + " characters, got " + code.length());
+        }
+    }
 
     /**
-     *
-     * @return
+     * @return the hex representation of a random valid component id.
      */
     public String getRandomId() {
         return validIds.get(random.nextInt(validIds.size()));
     }
 
     /**
-     *
-     * @return
+     * @return a code with a random valid component in every cell.
      */
     public String getRandomCode() {
-        StringBuilder sb = new StringBuilder(108);
-        for (int i = 0; i < 54; i++) {
+        StringBuilder sb = new StringBuilder(CODE_LENGTH);
+        for (int i = 0; i < GENES; i++) {
             sb.append(getRandomId());
         }
         return sb.toString();
     }
 
     /**
+     * Replaces one randomly chosen gene (any of the {@value #GENES}) with a random component id.
      *
-     * @param code
-     * @return
+     * @param code the code to mutate.
+     * @return the mutated code.
      */
     public String mutateGene(String code) {
-        StringBuilder sb = new StringBuilder();
-        int pos = random.nextInt(53) * 2;
-
-        for (int i = 0; i < 108; i++) {
-            if (i == pos) {
-                sb.append(getRandomId());
-                i++;
-            } else {
-                if( i < code.length()) sb.append(code.charAt(i));
-            }
-        }
-        return sb.toString();
+        requireValidCode(code);
+        int index = random.nextInt(GENES);
+        return code.substring(0, index * GENE_LENGTH) + getRandomId() + code.substring((index + 1) * GENE_LENGTH);
     }
 
     /**
-     *
-     * @param code1
-     * @param code2
-     * @return
+     * The child takes the genes before a random cut point from the first parent and the rest from the second.
      */
     public String onePointCrossover(String code1, String code2) {
-        int pos = random.nextInt(53) * 2;
-        StringBuilder sb = new StringBuilder(108);
-        for (int i = 0; i < 108; i++) {
-            if (i >= pos) {
-                sb.append(code2.charAt(i));
-            } else {
-                sb.append(code1.charAt(i));
-            }
-        }
-        return sb.toString();
+        requireValidCode(code1);
+        requireValidCode(code2);
+        int cut = 1 + random.nextInt(GENES - 1);
+        return code1.substring(0, cut * GENE_LENGTH) + code2.substring(cut * GENE_LENGTH);
     }
 
     /**
-     *
-     * @param code1
-     * @param code2
-     * @return
+     * A random, non-empty run of genes comes from one parent and the genes around it from the other; the run
+     * never covers the whole code, so the child always takes something from both parents.
      */
     public String twoPointCrossover(String code1, String code2) {
-        int pos1 = random.nextInt(53) * 2;
-        int pos2 = random.nextInt(53) * 2;
+        requireValidCode(code1);
+        requireValidCode(code2);
+        int from = random.nextInt(GENES);
+        int lastEnd = from == 0 ? GENES - 1 : GENES;
+        int to = from + 1 + random.nextInt(lastEnd - from);
 
-        if (pos2 < pos1) {
-            int aux = pos1;
-            pos1 = pos2;
-            pos2 = aux;
-        }
-
-        StringBuilder sb = new StringBuilder(108);
-
+        String outer = code1;
+        String inner = code2;
         if (random.nextBoolean()) {
-            for (int i = 0; i < 108; i++) {
-                if (i >= pos1 && i <= pos2) {
-                    sb.append(code2.charAt(i));
-                }
-
-                if (i < pos1) {
-                    sb.append(code1.charAt(i));
-                }
-
-                if (i > pos2) {
-                    sb.append(code2.charAt(i));
-                }
-            }
-        } else {
-            for (int i = 0; i < 108; i++) {
-                if (i >= pos1 && i <= pos2) {
-                    sb.append(code1.charAt(i));
-                }
-
-                if (i < pos1) {
-                    sb.append(code2.charAt(i));
-                }
-
-                if (i > pos2) {
-                    sb.append(code1.charAt(i));
-                }
-            }
+            outer = code2;
+            inner = code1;
         }
+        return outer.substring(0, from * GENE_LENGTH)
+                + inner.substring(from * GENE_LENGTH, to * GENE_LENGTH)
+                + outer.substring(to * GENE_LENGTH);
+    }
 
+    /**
+     * Every gene of the child comes from either parent with the same probability.
+     */
+    public String uniformCrossover(String code1, String code2) {
+        requireValidCode(code1);
+        requireValidCode(code2);
+        StringBuilder sb = new StringBuilder(CODE_LENGTH);
+        for (int i = 0; i < GENES; i++) {
+            sb.append(random.nextBoolean() ? gene(code1, i) : gene(code2, i));
+        }
         return sb.toString();
     }
-    
-    public String uniformCrossover(String code1, String code2){
-        StringBuilder sb = new StringBuilder(108);
-        
-        for (int i = 0; i < 108; i += 2){
-            if(code1.charAt(i) != code2.charAt(i) && code1.charAt(i+1) != code2.charAt(i+1) && random.nextBoolean()){
-                if(random.nextBoolean()){
-                    sb.append(code1.charAt(i)).append(code1.charAt(i+1));
-                }else{
-                    sb.append(code2.charAt(i)).append(code2.charAt(i+1));
-                }
-            }else{
-                if(random.nextBoolean()){
-                    sb.append(code2.charAt(i)).append(code2.charAt(i+1));
-                }else{
-                    sb.append(code1.charAt(i)).append(code1.charAt(i+1));
-                }
-            }
-        }
-        
-        return sb.toString();
-    } 
 }
