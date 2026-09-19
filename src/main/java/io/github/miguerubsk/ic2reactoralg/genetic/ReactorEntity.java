@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package geneticAlg;
+package io.github.miguerubsk.ic2reactoralg.genetic;
 
-import Simulator.Reactor;
-import Simulator.ReactorComponent;
+import io.github.miguerubsk.ic2reactoralg.simulator.Reactor;
+import io.github.miguerubsk.ic2reactoralg.simulator.ReactorComponent;
 
 /**
  *
@@ -33,9 +33,9 @@ public class ReactorEntity implements Comparable<ReactorEntity> {
 
     public final int initialHeat = 0;
 
-    public double minEUoutput = Double.MAX_VALUE;
+    public double minEuOutput = Double.MAX_VALUE;
 
-    public double maxEUoutput = 0.0;
+    public double maxEuOutput = 0.0;
 
     public double minHeatOutput = Double.MAX_VALUE;
 
@@ -47,7 +47,7 @@ public class ReactorEntity implements Comparable<ReactorEntity> {
 
     public double avgEfficiency = 0;
 
-    public double avgEUoutput = 0;
+    public double avgEuOutput = 0;
 
     public double fitness = 0;
 
@@ -78,7 +78,7 @@ public class ReactorEntity implements Comparable<ReactorEntity> {
 
         runSimulation();
 
-        fitness += avgEUoutput * 6;
+        fitness += avgEuOutput * 6;
         fitness += avgEfficiency * 10;
         if (leftoverHeat > 0) {
             fitness -= leftoverHeat;
@@ -97,27 +97,27 @@ public class ReactorEntity implements Comparable<ReactorEntity> {
 
         if (reachedBurn) {
             fitness -= 150;
-            fitness -= avgEUoutput;
+            fitness -= avgEuOutput;
         }
 
         if (reachedEvaporate) {
             fitness -= 300;
-            fitness -= avgEUoutput * 2;
+            fitness -= avgEuOutput * 2;
         }
 
         if (reachedHurt) {
             fitness -= 500;
-            fitness -= avgEUoutput * 3;
+            fitness -= avgEuOutput * 3;
         }
 
         if (reachedLava) {
             fitness -= 800;
-            fitness -= avgEUoutput * 4;
+            fitness -= avgEuOutput * 4;
         }
 
         if (reachedExplode) {
             fitness -= 1000;
-            fitness -= avgEUoutput * 5;
+            fitness -= avgEuOutput * 5;
         }
 
     }
@@ -147,13 +147,13 @@ public class ReactorEntity implements Comparable<ReactorEntity> {
 //                    publish(String.format("R%dC%d:0xC0C0C0", row, col));
                 }
             }
-            double lastEUoutput = 0.0;
-            double totalEUoutput = 0.0;
+            double lastEuOutput = 0.0;
+            double totalEuOutput = 0.0;
             double lastHeatOutput = 0.0;
             double totalHeatOutput = 0.0;
             double maxGeneratedHeat = 0.0;
             do {
-                reactor.clearEUOutput();
+                reactor.clearEuOutput();
                 reactor.clearVentedHeat();
                 for (int row = 0; row < 6; row++) {
                     for (int col = 0; col < 9; col++) {
@@ -209,14 +209,14 @@ public class ReactorEntity implements Comparable<ReactorEntity> {
                         }
                     }
                 }
-                lastEUoutput = reactor.getCurrentEUoutput();
-                totalEUoutput += lastEUoutput;
+                lastEuOutput = reactor.getCurrentEuOutput();
+                totalEuOutput += lastEuOutput;
                 lastHeatOutput = reactor.getVentedHeat();
                 totalHeatOutput += lastHeatOutput;
-                if (reactor.getCurrentHeat() <= reactor.getMaxHeat() && lastEUoutput > 0.0) {
+                if (reactor.getCurrentHeat() <= reactor.getMaxHeat() && lastEuOutput > 0.0) {
                     reactorTicks++;
-                    minEUoutput = Math.min(lastEUoutput, minEUoutput);
-                    maxEUoutput = Math.max(lastEUoutput, maxEUoutput);
+                    minEuOutput = Math.min(lastEuOutput, minEuOutput);
+                    maxEuOutput = Math.max(lastEuOutput, maxEuOutput);
                     minHeatOutput = Math.min(lastHeatOutput, minHeatOutput);
                     maxHeatOutput = Math.max(lastHeatOutput, maxHeatOutput);
                 }
@@ -231,10 +231,10 @@ public class ReactorEntity implements Comparable<ReactorEntity> {
                         }
                     }
                 }
-            } while (reactor.getCurrentHeat() <= reactor.getMaxHeat() && lastEUoutput > 0.0);
+            } while (reactor.getCurrentHeat() <= reactor.getMaxHeat() && lastEuOutput > 0.0);
 //            publish(String.format("Reactor minimum temperature: %,.2f\n", minReactorHeat));
             //           publish(String.format("Reactor maximum temperature: %,.2f\n", maxReactorHeat));
-            avgEUoutput = totalEUoutput / (reactorTicks * 20);
+            avgEuOutput = totalEuOutput / (reactorTicks * 20);
             if (reactor.getCurrentHeat() <= reactor.getMaxHeat()) {
 //                publish(String.format("Fuel rods (if any) stopped after %,d seconds.\n", reactorTicks));
                 if (reactorTicks > 0) {
@@ -244,10 +244,10 @@ public class ReactorEntity implements Comparable<ReactorEntity> {
 //                           publish(String.format("Efficiency: %.2f average, %.2f minimum, %.2f maximum\n", totalHeatOutput / reactorTicks / 4 / totalRodCount, minHeatOutput / 4 / totalRodCount, maxHeatOutput / 4 / totalRodCount));
                         }
                     } else {
-//                      publish(String.format("Total EU output: %,.0f (%.2f EU/t min, %.2f EU/t max, %.2f EU/t average)\n", totalEUoutput, minEUoutput / 20.0, maxEUoutput / 20.0, totalEUoutput / (reactorTicks * 20)));
+//                      publish(String.format("Total EU output: %,.0f (%.2f EU/t min, %.2f EU/t max, %.2f EU/t average)\n", totalEuOutput, minEuOutput / 20.0, maxEuOutput / 20.0, totalEuOutput / (reactorTicks * 20)));
                         if (totalRodCount > 0) {
-//                            publish(String.format("Efficiency: %.2f average, %.2f minimum, %.2f maximum\n", totalEUoutput / reactorTicks / 100 / totalRodCount, minEUoutput / 100 / totalRodCount, maxEUoutput / 100 / totalRodCount));
-                            avgEfficiency = totalEUoutput / reactorTicks / 100 / totalRodCount;
+//                            publish(String.format("Efficiency: %.2f average, %.2f minimum, %.2f maximum\n", totalEuOutput / reactorTicks / 100 / totalRodCount, minEuOutput / 100 / totalRodCount, maxEuOutput / 100 / totalRodCount));
+                            avgEfficiency = totalEuOutput / reactorTicks / 100 / totalRodCount;
                         }
                     }
                 }

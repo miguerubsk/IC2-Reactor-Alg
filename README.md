@@ -33,9 +33,12 @@ IC2-Reactor-Alg es un algoritmo evolutivo para generar automáticamente configur
 
 ```text
 IC2-Reactor-Alg/
-├── src/
-│   ├── geneticAlg/         # Lógica del algoritmo genético
-│   └── Simulator/          # Simulador de reactores y componentes
+├── src/main/java/io/github/miguerubsk/ic2reactoralg/
+│   ├── Main.java           # Punto de entrada
+│   ├── genetic/            # Lógica del algoritmo genético
+│   └── simulator/          # Simulador de reactores y componentes
+├── pom.xml                 # Build con Maven
+├── mvnw, mvnw.cmd          # Maven Wrapper (no hace falta instalar Maven)
 ├── config.txt              # Configuración de parámetros evolutivos
 ├── result.txt              # Resultados de la simulación
 ├── README.md               # Este archivo
@@ -49,13 +52,13 @@ IC2-Reactor-Alg/
    ```sh
    git clone https://github.com/miguerubsk/IC2-Reactor-Alg.git
    ```
-2. Compila el proyecto (requiere JDK):
+2. Compila el proyecto (requiere JDK 17 o superior; Maven se descarga solo mediante el wrapper):
    ```sh
-   javac -d bin $(find src -name "*.java")
+   ./mvnw package
    ```
-3. Ejecuta el algoritmo:
+3. Ejecuta el algoritmo desde la raíz del repositorio (lee `config.txt` del directorio actual):
    ```sh
-   java -cp bin Main.IC2ReactorAlg
+   java -jar target/ic2-reactor-alg.jar
    ```
 4. Revisa los resultados en `result.txt`.
 

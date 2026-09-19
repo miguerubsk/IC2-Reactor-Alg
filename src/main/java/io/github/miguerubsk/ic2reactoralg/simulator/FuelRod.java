@@ -1,6 +1,5 @@
-package Simulator;
+package io.github.miguerubsk.ic2reactoralg.simulator;
 
-import java.awt.Image;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,10 +15,10 @@ public class FuelRod extends ReactorComponent {
     private final int rodCount;
     private final boolean moxStyle;
 
-    public FuelRod(final int id, final String baseName, final String name, final Image image, final double maxDamage,
+    public FuelRod(final int id, final String baseName, final String name, final double maxDamage,
             final double maxHeat, final String sourceMod, final int energyMult, final double heatMult,
             final int rodCount, final boolean moxStyle) {
-        super(id, baseName, name, image, maxDamage, maxHeat, sourceMod);
+        super(id, baseName, name, maxDamage, maxHeat, sourceMod);
         this.energyMult = energyMult;
         this.heatMult = heatMult;
         this.rodCount = rodCount;
@@ -110,8 +109,8 @@ public class FuelRod extends ReactorComponent {
         if (moxStyle) {
             energy *= (1 + 4.0 * parent.getCurrentHeat() / parent.getMaxHeat());
         }
-        currentEUGenerated = energy;
-        parent.addEUOutput(energy);
+        currentEuGenerated = energy;
+        parent.addEuOutput(energy);
         applyDamage(1.0);
         return energy;
     }

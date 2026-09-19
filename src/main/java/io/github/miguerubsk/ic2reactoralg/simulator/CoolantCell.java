@@ -1,6 +1,5 @@
-package Simulator;
+package io.github.miguerubsk.ic2reactoralg.simulator;
 
-import java.awt.Image;
 
 /**
  * Represents a coolant cell in a reactor.
@@ -9,9 +8,9 @@ import java.awt.Image;
  */
 public class CoolantCell extends ReactorComponent {
 
-    public CoolantCell(final int id, final String baseName, final String name, final Image image,
+    public CoolantCell(final int id, final String baseName, final String name,
             final double maxDamage, final double maxHeat, final String sourceMod) {
-        super(id, baseName, name, image, maxDamage, maxHeat, sourceMod);
+        super(id, baseName, name, maxDamage, maxHeat, sourceMod);
     }
 
     public CoolantCell(final CoolantCell other) {

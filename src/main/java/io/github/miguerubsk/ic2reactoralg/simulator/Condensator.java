@@ -1,6 +1,5 @@
-package Simulator;
+package io.github.miguerubsk.ic2reactoralg.simulator;
 
-import java.awt.Image;
 
 /**
  * Represents a condensator in a reactor, either RSH or LZH.
@@ -9,9 +8,9 @@ import java.awt.Image;
  */
 public class Condensator extends ReactorComponent {
 
-    public Condensator(final int id, final String baseName, final String name, final Image image,
+    public Condensator(final int id, final String baseName, final String name,
             final double maxDamage, final double maxHeat, final String sourceMod) {
-        super(id, baseName, name, image, maxDamage, maxHeat, sourceMod);
+        super(id, baseName, name, maxDamage, maxHeat, sourceMod);
     }
 
     public Condensator(final Condensator other) {
