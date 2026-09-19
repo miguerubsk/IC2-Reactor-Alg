@@ -1,6 +1,5 @@
 package Simulator;
 
-import java.awt.Image;
 
 /**
  * Represents some form of reactor plating, which changes how much heat the reactor
@@ -12,10 +11,10 @@ public class Plating extends ReactorComponent {
 
     private final int heatAdjustment;
 
-    public Plating(final int id, final String baseName, final String name, final Image image,
+    public Plating(final int id, final String baseName, final String name,
             final double maxDamage, final double maxHeat, final String sourceMod, final int heatAdjustment,
             final double explosionPowerMultiplier) {
-        super(id, baseName, name, image, maxDamage, maxHeat, sourceMod);
+        super(id, baseName, name, maxDamage, maxHeat, sourceMod);
         this.heatAdjustment = heatAdjustment;
         this.explosionPowerMultiplier = explosionPowerMultiplier;
     }

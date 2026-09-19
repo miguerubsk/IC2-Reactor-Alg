@@ -1,6 +1,5 @@
 package Simulator;
 
-import java.awt.Image;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,9 +14,9 @@ public class Vent extends ReactorComponent {
     private final int hullDraw;
     private final int sideVent;
 
-    public Vent(final int id, final String baseName, final String name, final Image image, final double maxDamage,
+    public Vent(final int id, final String baseName, final String name, final double maxDamage,
             final double maxHeat, final String sourceMod, final int selfVent, final int hullDraw, final int sideVent) {
-        super(id, baseName, name, image, maxDamage, maxHeat, sourceMod);
+        super(id, baseName, name, maxDamage, maxHeat, sourceMod);
         this.selfVent = selfVent;
         this.hullDraw = hullDraw;
         this.sideVent = sideVent;

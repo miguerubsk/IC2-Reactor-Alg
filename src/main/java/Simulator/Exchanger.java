@@ -1,6 +1,5 @@
 package Simulator;
 
-import java.awt.Image;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,10 +13,10 @@ public class Exchanger extends ReactorComponent {
     private final int switchSide;
     private final int switchReactor;
 
-    public Exchanger(final int id, final String baseName, final String name, final Image image,
+    public Exchanger(final int id, final String baseName, final String name,
             final double maxDamage, final double maxHeat, final String sourceMod, final int switchSide,
             final int switchReactor) {
-        super(id, baseName, name, image, maxDamage, maxHeat, sourceMod);
+        super(id, baseName, name, maxDamage, maxHeat, sourceMod);
         this.switchSide = switchSide;
         this.switchReactor = switchReactor;
     }

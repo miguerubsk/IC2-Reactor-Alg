@@ -1,6 +1,5 @@
 package Simulator;
 
-import java.awt.Image;
 
 /**
  * Represents a neutron reflector in a reactor.
@@ -9,9 +8,9 @@ import java.awt.Image;
  */
 public class Reflector extends ReactorComponent {
 
-    public Reflector(final int id, final String baseName, final String name, final Image image,
+    public Reflector(final int id, final String baseName, final String name,
             final double maxDamage, final double maxHeat, final String sourceMod) {
-        super(id, baseName, name, image, maxDamage, maxHeat, sourceMod);
+        super(id, baseName, name, maxDamage, maxHeat, sourceMod);
     }
 
     public Reflector(final Reflector other) {

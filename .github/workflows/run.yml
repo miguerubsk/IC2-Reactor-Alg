@@ -26,15 +26,13 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        #cache: maven
+        cache: maven
         
-    - name: Build with javac
-      run: |
-        mkdir -p bin
-        find src -name "*.java" | xargs javac -d bin
+    - name: Build with Maven
+      run: ./mvnw -B -ntp package
 
     - name: Run algorithm
-      run: java -cp bin Main.IC2ReactorAlg
+      run: java -jar target/ic2-reactor-alg.jar
         
 
 
