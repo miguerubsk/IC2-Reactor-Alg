@@ -63,6 +63,18 @@ public final class MaterialsList {
         }
     }
 
+    /**
+     * Gets the materials list for a given component. Since the ported component
+     * classes are generic/data-driven (no longer one Java class per item), there's
+     * no per-item MATERIALS constant to look up anymore; this returns an empty list.
+     * Not used by the genetic algorithm (only relevant to the GUI's cost estimation).
+     * @param component the component to look up (unused).
+     * @return an empty materials list.
+     */
+    public static MaterialsList getMaterialsForComponent(ReactorComponent component) {
+        return new MaterialsList();
+    }
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder(1000);

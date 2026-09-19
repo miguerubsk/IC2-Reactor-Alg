@@ -1,121 +1,174 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Simulator;
 
 import java.awt.Image;
 
 /**
  * Represents a component in an IndustrialCraft2 Experimental Nuclear Reactor.
- * @author Brian McCloud
+ *
+ * Ported from the data-driven "ReactorItem" base class introduced by the
+ * upstream Ic2ExpReactorPlanner project (Ic2ExpReactorPlanner.components.ReactorItem).
+ * The class keeps the historical name "ReactorComponent" (and the subset of the
+ * public API that the genetic algorithm depends on) so that callers outside of
+ * the Simulator package do not need to change.
+ *
+ * @author Brian McCloud (original), ported for IC2-Reactor-Alg
  */
 public class ReactorComponent {
-    
-    private Image image = null;
-    
-    private int row = -10;
-    private int column = -10;
-    
-    private double initialHeat = 0.0;
-    protected double currentHeat = 0.0;
-    private double maxHeat = 1.0;
-    
-    private double currentDamage = 0.0;
-    private double maxDamage = 1.0;
-    
-    private Reactor parent = null;
-    
-    protected double effectiveVentCooling = 0.0;
-    
-    protected double bestCondensatorCooling = 0.0;
-    
-    protected double bestCellCooling = 0.0;
-    
-    protected double currentCondensatorCooling = 0.0;
-    
-    protected double currentCellCooling = 0.0;
-    
-    /**
-     * Information about this component from the last simulation.
-     */
-    public String info = "";
-    
-    /**
-     * Threshold for heat/damage for removing this component during an automation run.
-     */
+
+    // Fundamental values, set at object instantiation, should never need to be changed.
+    public final int id;
+    public final String baseName; // non-localized name, for internal/program use (matches ComponentFactory table)
+    public final String name; // display name
+    public final Image image;
+    protected double maxDamage;
+    protected double maxHeat;
+    public final String sourceMod; // null for base IC2 components
+
+    // Simulation setting values
+    private double initialHeat = 0;
+
+    public double getInitialHeat() {
+        return initialHeat;
+    }
+
+    public void setInitialHeat(final double value) {
+        if (this.isHeatAcceptor() && value >= 0 && value < this.maxHeat) {
+            initialHeat = value;
+        }
+    }
+
     public int automationThreshold = 9000;
-    
-    /**
-     * Time to pause the reactor while replacing the component during an automation run.
-     */
-    public int reactorPause = 1;
-    
-    /**
-     * Get the image to show in the planner for this component.
-     * @return the image.
-     */
+
+    public int reactorPause = 0;
+
+    // Parent reactor and position
+    protected Reactor parent = null;
+    protected int row = -10;
+    protected int col = -10;
+
+    // Calculated values.
+    protected double currentDamage = 0;
+    protected double currentHeat = 0;
+
+    protected double currentEUGenerated = 0;
+    protected double currentHeatGenerated = 0;
+
+    protected double currentHullHeating = 0;
+    protected double currentComponentHeating = 0;
+    protected double currentHullCooling = 0;
+    protected double currentVentCooling = 0;
+    protected double effectiveVentCooling = 0; // best/last vent cooling seen, kept for compatibility
+
+    protected double currentCellCooling = 0;
+    protected double bestCellCooling = 0;
+
+    protected double currentCondensatorCooling = 0;
+    protected double bestCondensatorCooling = 0;
+
+    protected double explosionPowerMultiplier = 1;
+
+    protected ReactorComponent(final int id, final String baseName, final String name, final Image image,
+            final double maxDamage, final double maxHeat, final String sourceMod) {
+        this.id = id;
+        this.baseName = baseName;
+        this.name = name;
+        this.image = image;
+        this.maxDamage = maxDamage;
+        this.maxHeat = maxHeat;
+        if (maxHeat > 1) {
+            automationThreshold = (int) (maxHeat * 0.9);
+        } else if (maxDamage > 1) {
+            automationThreshold = (int) (maxDamage * 1.1);
+        }
+        this.sourceMod = sourceMod;
+    }
+
+    // Copy constructor for use by subclasses (ComponentFactory uses this to create new instances of the default components).
+    protected ReactorComponent(final ReactorComponent other) {
+        this.id = other.id;
+        this.baseName = other.baseName;
+        this.name = other.name;
+        this.image = other.image;
+        this.maxDamage = other.maxDamage;
+        this.maxHeat = other.maxHeat;
+        this.initialHeat = other.initialHeat;
+        this.automationThreshold = other.automationThreshold;
+        this.reactorPause = other.reactorPause;
+        this.sourceMod = other.sourceMod;
+    }
+
+    @Override
+    public String toString() {
+        String result = name;
+        if (initialHeat > 0) {
+            result += String.format(" (initial heat: %,d)", (int) initialHeat);
+        }
+        return result;
+    }
+
     public Image getImage() {
         return image;
     }
-    
-    /**
-     * Set the image to show in the planner for this component.
-     * @param image the image to set.
-     */
-    protected final void setImage(Image image) {
-        this.image = image;
-    }
 
-    /**
-     * @return the row
-     */
     public final int getRow() {
         return row;
     }
 
-    /**
-     * @param row the row to set
-     */
     public final void setRow(int row) {
         this.row = row;
     }
 
-    /**
-     * @return the column
-     */
     public final int getColumn() {
-        return column;
+        return col;
+    }
+
+    public final void setColumn(int col) {
+        this.col = col;
+    }
+
+    protected Reactor getParent() {
+        return parent;
+    }
+
+    public void setParent(Reactor parent) {
+        this.parent = parent;
     }
 
     /**
-     * @param column the column to set
-     */
-    public final void setColumn(int column) {
-        this.column = column;
-    }
-    
-    /**
      * Checks if this component can accept heat. (e.g. from adjacent fuel rods, or from an exchanger)
-     * @return true if this component can accept heat, false otherwise.
      */
     public boolean isHeatAcceptor() {
-        return false;
+        return maxHeat > 1 && !isBroken();
     }
-    
+
+    /**
+     * Determines if this component can be cooled down, such as by a component heat vent.
+     */
+    public boolean isCoolable() {
+        return maxHeat > 1 && !(this instanceof Condensator);
+    }
+
+    /**
+     * Checks if this component acts as a neutron reflector, and boosts performance of adjacent fuel rods.
+     */
     public boolean isNeutronReflector() {
         return false;
     }
-    
+
     /**
      * Prepare for a new reactor tick.
      */
     public void preReactorTick() {
+        currentHullHeating = 0.0;
+        currentComponentHeating = 0.0;
+        currentHullCooling = 0.0;
+        currentVentCooling = 0.0;
         currentCellCooling = 0.0;
         currentCondensatorCooling = 0.0;
+        currentEUGenerated = 0;
+        currentHeatGenerated = 0;
     }
-    
+
     /**
      * Generate heat if appropriate for component type, and spread to reactor or adjacent cells.
      * @return the amount of heat generated by this component.
@@ -123,21 +176,23 @@ public class ReactorComponent {
     public double generateHeat() {
         return 0.0;
     }
-    
+
     /**
      * Generate energy if appropriate for component type.
+     * @return the number of EU generated by this component during the current reactor tick.
      */
-    public void generateEnergy() {
-        // do nothing by default.
+    public double generateEnergy() {
+        return 0.0;
     }
-    
+
     /**
-     * Dissipate heat if appropriate for component type.
+     * Dissipate (aka vent) heat if appropriate for component type.
+     * @return the amount of heat successfully vented during the current reactor tick.
      */
-    public void dissipate() {
-        // do nothing by default.
+    public double dissipate() {
+        return 0.0;
     }
-    
+
     /**
      * Transfer heat between component, neighbors, and/or reactor, if appropriate for component type.
      */
@@ -151,14 +206,16 @@ public class ReactorComponent {
     public void addToReactor() {
         // do nothing by default.
     }
-    
+
     /**
      * Apply changes to the reactor when removing this component if appropriate, such as for reactor plating.
      */
     public void removeFromReactor() {
-        
+        parent = null;
+        this.row = -10;
+        this.col = -10;
     }
-    
+
     /**
      * @return the current heat level of the component.
      */
@@ -175,11 +232,11 @@ public class ReactorComponent {
         bestCondensatorCooling = 0.0;
         bestCellCooling = 0.0;
     }
-    
+
     /**
-     * Adjusts the component heat up or down
+     * Adjusts the component heat up or down.
      * @param heat the amount of heat to adjust by (positive to add heat, negative to remove heat).
-     * @return the amount of heat adjustment refused. (e.g. due to going below minimum heat, breaking due to excessive heat, or attempting to remove heat from a condensator)
+     * @return the amount of heat adjustment refused.
      */
     public double adjustCurrentHeat(final double heat) {
         if (isHeatAcceptor()) {
@@ -198,19 +255,12 @@ public class ReactorComponent {
         }
         return heat;
     }
-    
+
     /**
      * @return the maximum heat the component can take.
      */
-    public final double getMaxHeat() {
+    public double getMaxHeat() {
         return maxHeat;
-    }
-
-    /**
-     * @param maxHeat the maximum heat the component can take.
-     */
-    public final void setMaxHeat(final double maxHeat) {
-        this.maxHeat = maxHeat;
     }
 
     /**
@@ -221,112 +271,85 @@ public class ReactorComponent {
     }
 
     /**
-     * Clears the damage back to 0 (used when resetting simulation, or replacing the component in an automation simulation).
+     * Clears the damage back to 0 (used when resetting simulation).
      */
     public final void clearDamage() {
         currentDamage = 0.0;
     }
-    
+
     /**
-     * Applies damage to the component, as opposed to heat.  Mainly used for 
-     * fuel rods and neutron reflectors that lose durability as the reactor runs,
-     * but can't recover it via cooling.
+     * Applies damage to the component, as opposed to heat.
      * @param damage the damage to apply (only used if positive).
      */
     public final void applyDamage(final double damage) {
-        if (damage > 0.0) {
+        if (maxDamage > 1 && damage > 0.0) {
             currentDamage += damage;
         }
     }
-    
+
     /**
-     * @return the the maximum damage the component can take.
+     * @return the maximum damage the component can take.
      */
-    public final double getMaxDamage() {
+    public double getMaxDamage() {
         return maxDamage;
     }
 
     /**
-     * @param maxDamage the maximum damage the component can take.
-     */
-    public final void setMaxDamage(double maxDamage) {
-        this.maxDamage = maxDamage;
-    }
-
-    /**
-     * Gets the parent reactor.
-     * @return the reactor this component is in.
-     */
-    protected Reactor getParent() {
-        return parent;
-    }
-
-    /**
-     * Sets the parent reactor.
-     * @param parent the parent reactor to set
-     */
-    public void setParent(Reactor parent) {
-        this.parent = parent;
-    }
-    
-    /**
-     * Determines if this component is broken in the current tick of the simulation
-     * @return true if the component has broken either from damage (e.g. neutron reflectors, fuel rods) or from heat (e.g. heat vents, coolant cells), false otherwise.
+     * Determines if this component is broken in the current tick of the simulation.
      */
     public boolean isBroken() {
-        return currentHeat >= maxHeat || currentDamage > maxDamage;
+        return currentHeat >= getMaxHeat() || currentDamage >= getMaxDamage();
     }
-    
+
     /**
      * Gets the materials needed for this component.
-     * @return the materials needed for this component.
      */
     public MaterialsList getMaterials() {
-        return null;
+        return MaterialsList.getMaterialsForComponent(this);
     }
 
-    /**
-     * Gets the initial heat previously set for the component.
-     * @return the initial heat.
-     */
-    public double getInitialHeat() {
-        return initialHeat;
-    }
-
-    /**
-     * Set the initial heat of the component, as long as the component can accept heat, 
-     * and the initial heat greater than or equal to zero and less than the max heat.
-     * If any condition is false, the value is ignored.
-     * @param initialHeat the initial heat to set
-     */
-    public void setInitialHeat(double initialHeat) {
-        if (this.isHeatAcceptor() && initialHeat >= 0 && initialHeat < this.getMaxHeat()) {
-            this.initialHeat = initialHeat;
-        }
-    }
-    
     public double getEffectiveVentCooling() {
         return effectiveVentCooling;
     }
-    
+
     public double getVentCoolingCapacity() {
+        return 0;
+    }
+
+    public double getHullCoolingCapacity() {
         return 0;
     }
 
     public double getBestCondensatorCooling() {
         return bestCondensatorCooling;
     }
-    
+
     public double getBestCellCooling() {
         return bestCellCooling;
     }
-    
+
     /**
      * The number of fuel rods in this component (0 for non-fuel-rod components).
-     * @return The number of fuel rods in this component, or 0 if this component has no fuel rods.
      */
     public int getRodCount() {
         return 0;
     }
-    
+
+    /**
+     * Determines if this is a condensator that needs a Reactor Coolant Injector item added.
+     */
+    public boolean needsCoolantInjected() {
+        return false;
+    }
+
+    /**
+     * Simulates having a coolant item added by a Reactor Coolant Injector.
+     */
+    public void injectCoolant() {
+        // do nothing by default.
+    }
+
+    public double getExplosionPowerMultiplier() {
+        return explosionPowerMultiplier;
+    }
 }

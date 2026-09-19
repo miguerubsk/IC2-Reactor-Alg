@@ -1,37 +1,38 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Simulator;
 
 import javax.swing.JOptionPane;
 
 /**
  * Represents an IndustrialCraft2 Nuclear Reactor.
- * @author Brian McCloud
+ *
+ * Ported to use the data-driven (generic parameterized) component classes from
+ * the upstream Ic2ExpReactorPlanner project, while preserving the historical
+ * external API and code encoding (2 hex chars per grid cell, optional "(hNN)"
+ * initial-heat suffix) that geneticAlg.codeHelper / geneticAlg.ReactorEntity depend on.
+ *
+ * @author Brian McCloud (original), ported for IC2-Reactor-Alg
  */
 public class Reactor {
-    
+
     private final ReactorComponent[][] grid = new ReactorComponent[6][9];
-    
+
     private double currentEUoutput = 0.0;
-    
+
     private double currentHeat = 0.0;
-    
+
     private double maxHeat = 10000.0;
-    
+
     private double ventedHeat = 0.0;
-    
+
     private boolean fluid = false;
-    
+
     public ReactorComponent getComponentAt(int row, int column) {
         if (row >= 0 && row < grid.length && column >= 0 && column < grid[row].length) {
             return grid[row][column];
         }
         return null;
     }
-    
+
     public void setComponentAt(int row, int column, ReactorComponent component) {
         if (row >= 0 && row < grid.length && column >= 0 && column < grid[row].length) {
             if (grid[row][column] != null) {
@@ -48,16 +49,16 @@ public class Reactor {
     }
 
     public void clearGrid() {
-        for (ReactorComponent[] grid1 : grid) {
-            for (int col = 0; col < grid1.length; col++) {
-                if (grid1[col] != null) {
-                    grid1[col].removeFromReactor();
+        for (ReactorComponent[] gridRow : grid) {
+            for (int col = 0; col < gridRow.length; col++) {
+                if (gridRow[col] != null) {
+                    gridRow[col].removeFromReactor();
                 }
-                grid1[col] = null;
+                gridRow[col] = null;
             }
         }
     }
-    
+
     /**
      * @return the amount of EU output in the reactor tick just simulated.
      */
@@ -78,7 +79,7 @@ public class Reactor {
     public double getMaxHeat() {
         return maxHeat;
     }
-    
+
     /**
      * Adjust the maximum heat
      * @param adjustment the adjustment amount (negative values decrease the max heat).
@@ -94,7 +95,7 @@ public class Reactor {
     public void setCurrentHeat(double currentHeat) {
         this.currentHeat = currentHeat;
     }
-    
+
     /**
      * Adjusts the reactor's current heat by a specified amount
      * @param adjustment the adjustment amount.
@@ -105,7 +106,7 @@ public class Reactor {
             currentHeat = 0.0;
         }
     }
-    
+
     /**
      * add some EU output.
      * @param amount the amount of EU to output over 1 reactor tick (20 game ticks).
@@ -113,14 +114,14 @@ public class Reactor {
     public void addEUOutput(double amount) {
         currentEUoutput += amount;
     }
-    
+
     /**
      * clears the EU output (presumably to start simulating a new reactor tick).
      */
     public void clearEUOutput() {
         currentEUoutput = 0.0;
     }
-    
+
     /**
      * Gets a list of the materials needed to build the components.
      * @return a list of the materials needed to build the components.
@@ -143,7 +144,7 @@ public class Reactor {
     public double getVentedHeat() {
         return ventedHeat;
     }
-    
+
     /**
      * Adds to the amount of heat vented this reactor tick, in case it is a new-style reactor with a pressure vessel and outputting heat to fluid instead of EU.
      * @param amount the amount to add.
@@ -151,14 +152,14 @@ public class Reactor {
     public void ventHeat(double amount) {
         ventedHeat += amount;
     }
-    
+
     /**
      * Clears the amount of vented heat, in case a new reactor tick is starting.
      */
     public void clearVentedHeat() {
         ventedHeat = 0;
     }
-    
+
     /**
      * Get a code that represents the component set, which can be passed between forum users, etc.
      * @return a code representing some ids for the components and arrangement.  Passing the same code to setCode() should re-create an identical reactor setup, even if other changes have happened in the meantime.
@@ -171,13 +172,13 @@ public class Reactor {
                 final int id = ComponentFactory.getID(component);
                 result.append(String.format("%02X", id));
                 if (component != null && component.getInitialHeat() > 0) {
-                    result.append(String.format("(h%s)", Integer.toString((int)component.getInitialHeat(), 36)));
+                    result.append(String.format("(h%s)", Integer.toString((int) component.getInitialHeat(), 36)));
                 }
             }
         }
         return result.toString();
     }
-    
+
     /**
      * Sets a code to configure the entire grid all at once.  Expects the code to have originally been output by getCode().
      * @param code the code of the reactor setup to use.
@@ -244,85 +245,85 @@ public class Reactor {
                                 setComponentAt(y, x, null);
                                 break;
                             case 1:
-                                setComponentAt(y, x, new FuelRodUranium());
+                                setComponentAt(y, x, ComponentFactory.createComponent("fuelRodUranium"));
                                 break;
                             case 2:
-                                setComponentAt(y, x, new DualFuelRodUranium());
+                                setComponentAt(y, x, ComponentFactory.createComponent("dualFuelRodUranium"));
                                 break;
                             case 3:
-                                setComponentAt(y, x, new QuadFuelRodUranium());
+                                setComponentAt(y, x, ComponentFactory.createComponent("quadFuelRodUranium"));
                                 break;
                             case 4:
                                 warnings.append(String.format("Obsolete component (depleted isotope cell) at row %d column %d removed.\n", y, x));
                                 break;
                             case 5:
-                                setComponentAt(y, x, new NeutronReflector());
+                                setComponentAt(y, x, ComponentFactory.createComponent("neutronReflector"));
                                 break;
                             case 6:
-                                setComponentAt(y, x, new ThickNeutronReflector());
+                                setComponentAt(y, x, ComponentFactory.createComponent("thickNeutronReflector"));
                                 break;
                             case 7:
-                                setComponentAt(y, x, new HeatVent());
+                                setComponentAt(y, x, ComponentFactory.createComponent("heatVent"));
                                 break;
                             case 8:
-                                setComponentAt(y, x, new ReactorHeatVent());
+                                setComponentAt(y, x, ComponentFactory.createComponent("reactorHeatVent"));
                                 break;
                             case 9:
-                                setComponentAt(y, x, new OverclockedHeatVent());
+                                setComponentAt(y, x, ComponentFactory.createComponent("overclockedHeatVent"));
                                 break;
                             case 10:
-                                setComponentAt(y, x, new AdvancedHeatVent());
+                                setComponentAt(y, x, ComponentFactory.createComponent("advancedHeatVent"));
                                 break;
                             case 11:
-                                setComponentAt(y, x, new ComponentHeatVent());
+                                setComponentAt(y, x, ComponentFactory.createComponent("componentHeatVent"));
                                 break;
                             case 12:
-                                setComponentAt(y, x, new RshCondensator());
+                                setComponentAt(y, x, ComponentFactory.createComponent("rshCondensator"));
                                 break;
                             case 13:
-                                setComponentAt(y, x, new LzhCondensator());
+                                setComponentAt(y, x, ComponentFactory.createComponent("lzhCondensator"));
                                 break;
                             case 14:
-                                setComponentAt(y, x, new HeatExchanger());
+                                setComponentAt(y, x, ComponentFactory.createComponent("heatExchanger"));
                                 break;
                             case 15:
-                                setComponentAt(y, x, new ReactorHeatExchanger());
+                                setComponentAt(y, x, ComponentFactory.createComponent("coreHeatExchanger"));
                                 break;
                             case 16:
-                                setComponentAt(y, x, new ComponentHeatExchanger());
+                                setComponentAt(y, x, ComponentFactory.createComponent("componentHeatExchanger"));
                                 break;
                             case 17:
-                                setComponentAt(y, x, new AdvancedHeatExchanger());
+                                setComponentAt(y, x, ComponentFactory.createComponent("advancedHeatExchanger"));
                                 break;
                             case 18:
-                                setComponentAt(y, x, new ReactorPlating());
+                                setComponentAt(y, x, ComponentFactory.createComponent("reactorPlating"));
                                 break;
                             case 19:
-                                setComponentAt(y, x, new HeatCapacityReactorPlating());
+                                setComponentAt(y, x, ComponentFactory.createComponent("heatCapacityReactorPlating"));
                                 break;
                             case 20:
-                                setComponentAt(y, x, new ContainmentReactorPlating());
+                                setComponentAt(y, x, ComponentFactory.createComponent("containmentReactorPlating"));
                                 break;
                             case 21:
-                                setComponentAt(y, x, new CoolantCell10k());
+                                setComponentAt(y, x, ComponentFactory.createComponent("coolantCell10k"));
                                 break;
                             case 22:
-                                setComponentAt(y, x, new CoolantCell30k());
+                                setComponentAt(y, x, ComponentFactory.createComponent("coolantCell30k"));
                                 break;
                             case 23:
-                                setComponentAt(y, x, new CoolantCell60k());
+                                setComponentAt(y, x, ComponentFactory.createComponent("coolantCell60k"));
                                 break;
                             case 24:
                                 warnings.append(String.format("Obsolete component (heating cell) at row %d column %d removed.\n", y, x));
                                 break;
                             case 32:
-                                setComponentAt(y, x, new FuelRodThorium());
+                                setComponentAt(y, x, ComponentFactory.createComponent("fuelRodThorium"));
                                 break;
                             case 33:
-                                setComponentAt(y, x, new DualFuelRodThorium());
+                                setComponentAt(y, x, ComponentFactory.createComponent("dualFuelRodThorium"));
                                 break;
                             case 34:
-                                setComponentAt(y, x, new QuadFuelRodThorium());
+                                setComponentAt(y, x, ComponentFactory.createComponent("quadFuelRodThorium"));
                                 break;
                             case 35:
                                 warnings.append(String.format("Obsolete component (plutonium cell) at row %d column %d removed.\n", y, x));
@@ -334,25 +335,25 @@ public class Reactor {
                                 warnings.append(String.format("Obsolete component (quad plutonium cell) at row %d column %d removed.\n", y, x));
                                 break;
                             case 38:
-                                setComponentAt(y, x, new IridiumNeutronReflector());
+                                setComponentAt(y, x, ComponentFactory.createComponent("iridiumNeutronReflector"));
                                 break;
                             case 39:
-                                setComponentAt(y, x, new CoolantCell60kHelium());
+                                setComponentAt(y, x, ComponentFactory.createComponent("coolantCellHelium60k"));
                                 break;
                             case 40:
-                                setComponentAt(y, x, new CoolantCell180kHelium());
+                                setComponentAt(y, x, ComponentFactory.createComponent("coolantCellHelium180k"));
                                 break;
                             case 41:
-                                setComponentAt(y, x, new CoolantCell360kHelium());
+                                setComponentAt(y, x, ComponentFactory.createComponent("coolantCellHelium360k"));
                                 break;
                             case 42:
-                                setComponentAt(y, x, new CoolantCell60kNak());
+                                setComponentAt(y, x, ComponentFactory.createComponent("coolantCellNak60k"));
                                 break;
                             case 43:
-                                setComponentAt(y, x, new CoolantCell180kNak());
+                                setComponentAt(y, x, ComponentFactory.createComponent("coolantCellNak180k"));
                                 break;
                             case 44:
-                                setComponentAt(y, x, new CoolantCell360kNak());
+                                setComponentAt(y, x, ComponentFactory.createComponent("coolantCellNak360k"));
                                 break;
                             default:
                                 warnings.append(String.format("Unrecognized component (id %d) at row %d column %d removed.\n", nextValue, y, x));
@@ -383,5 +384,5 @@ public class Reactor {
     public void setFluid(boolean fluid) {
         this.fluid = fluid;
     }
-    
+
 }

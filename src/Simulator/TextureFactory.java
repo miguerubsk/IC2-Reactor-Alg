@@ -69,5 +69,20 @@ public class TextureFactory {
         }
         return null;
     }
-    
+
+    /**
+     * Convenience overload matching upstream's two-argument form (primary image name,
+     * with a fallback name to try if the primary one can't be found/loaded).
+     * @param imageName the preferred image file name.
+     * @param fallbackName the fallback image file name.
+     * @return the loaded image, or null if neither could be loaded.
+     */
+    public static Image getImage(String imageName, String fallbackName) {
+        Image image = getImage(imageName);
+        if (image != null) {
+            return image;
+        }
+        return getImage(fallbackName);
+    }
+
 }

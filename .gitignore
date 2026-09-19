@@ -43,3 +43,4 @@ nbdist/
 *.sh
 /IC2-Reactor-Alg
 result.txt
+bin/
