@@ -26,19 +26,19 @@ public class Reflector extends ReactorComponent {
     @Override
     public double generateHeat() {
         ReactorComponent component = parent.getComponentAt(row - 1, col);
-        if (component != null) {
+        if (component != null && component.isNeutronReflector()) {
             applyDamage(component.getRodCount());
         }
         component = parent.getComponentAt(row, col + 1);
-        if (component != null) {
+        if (component != null && component.isNeutronReflector()) {
             applyDamage(component.getRodCount());
         }
         component = parent.getComponentAt(row + 1, col);
-        if (component != null) {
+        if (component != null && component.isNeutronReflector()) {
             applyDamage(component.getRodCount());
         }
         component = parent.getComponentAt(row, col - 1);
-        if (component != null) {
+        if (component != null && component.isNeutronReflector()) {
             applyDamage(component.getRodCount());
         }
         return 0;

@@ -25,7 +25,7 @@ public class Condensator extends ReactorComponent {
         }
         currentCondensatorCooling += heat;
         bestCondensatorCooling = Math.max(currentCondensatorCooling, bestCondensatorCooling);
-        double acceptedHeat = Math.min(heat, getMaxHeat() - heat);
+        double acceptedHeat = Math.min(heat, Math.max(0.0, getMaxHeat() - currentHeat));
         double result = heat - acceptedHeat;
         currentHeat += acceptedHeat;
         return result;

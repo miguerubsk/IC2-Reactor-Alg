@@ -31,11 +31,6 @@ public class Vent extends ReactorComponent {
     }
 
     @Override
-    public boolean isHeatAcceptor() {
-        return !isBroken();
-    }
-
-    @Override
     public double dissipate() {
         double deltaHeat = Math.min(hullDraw, parent.getCurrentHeat());
         currentHullCooling = deltaHeat;
