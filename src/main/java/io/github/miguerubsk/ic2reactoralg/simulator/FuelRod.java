@@ -1,4 +1,4 @@
-package Simulator;
+package io.github.miguerubsk.ic2reactoralg.simulator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,8 +109,8 @@ public class FuelRod extends ReactorComponent {
         if (moxStyle) {
             energy *= (1 + 4.0 * parent.getCurrentHeat() / parent.getMaxHeat());
         }
-        currentEUGenerated = energy;
-        parent.addEUOutput(energy);
+        currentEuGenerated = energy;
+        parent.addEuOutput(energy);
         applyDamage(1.0);
         return energy;
     }

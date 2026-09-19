@@ -23,7 +23,7 @@
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <main.class>Main.IC2ReactorAlg</main.class>
+        <main.class>io.github.miguerubsk.ic2reactoralg.Main</main.class>
     </properties>
 
     <build>

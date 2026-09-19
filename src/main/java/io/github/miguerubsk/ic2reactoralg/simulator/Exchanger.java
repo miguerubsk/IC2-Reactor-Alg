@@ -1,4 +1,4 @@
-package Simulator;
+package io.github.miguerubsk.ic2reactoralg.simulator;
 
 import java.util.ArrayList;
 import java.util.List;

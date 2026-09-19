@@ -1,4 +1,4 @@
-package Simulator;
+package io.github.miguerubsk.ic2reactoralg.simulator;
 
 /**
  * Represents a component in an IndustrialCraft2 Experimental Nuclear Reactor.
@@ -47,7 +47,7 @@ public class ReactorComponent {
     protected double currentDamage = 0;
     protected double currentHeat = 0;
 
-    protected double currentEUGenerated = 0;
+    protected double currentEuGenerated = 0;
     protected double currentHeatGenerated = 0;
 
     protected double currentHullHeating = 0;
@@ -156,7 +156,7 @@ public class ReactorComponent {
         currentVentCooling = 0.0;
         currentCellCooling = 0.0;
         currentCondensatorCooling = 0.0;
-        currentEUGenerated = 0;
+        currentEuGenerated = 0;
         currentHeatGenerated = 0;
     }
 
@@ -290,13 +290,6 @@ public class ReactorComponent {
      */
     public boolean isBroken() {
         return currentHeat >= getMaxHeat() || currentDamage >= getMaxDamage();
-    }
-
-    /**
-     * Gets the materials needed for this component.
-     */
-    public MaterialsList getMaterials() {
-        return MaterialsList.getMaterialsForComponent(this);
     }
 
     public double getEffectiveVentCooling() {

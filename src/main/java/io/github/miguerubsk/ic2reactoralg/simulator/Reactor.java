@@ -1,4 +1,4 @@
-package Simulator;
+package io.github.miguerubsk.ic2reactoralg.simulator;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  * Ported to use the data-driven (generic parameterized) component classes from
  * the upstream Ic2ExpReactorPlanner project, while preserving the historical
  * external API and code encoding (2 hex chars per grid cell, optional "(hNN)"
- * initial-heat suffix) that geneticAlg.codeHelper / geneticAlg.ReactorEntity depend on.
+ * initial-heat suffix) that genetic.CodeHelper / genetic.ReactorEntity depend on.
  *
  * @author Brian McCloud (original), ported for IC2-Reactor-Alg
  */
@@ -17,7 +17,7 @@ public class Reactor {
 
     private final ReactorComponent[][] grid = new ReactorComponent[6][9];
 
-    private double currentEUoutput = 0.0;
+    private double currentEuOutput = 0.0;
 
     private double currentHeat = 0.0;
 
@@ -63,8 +63,8 @@ public class Reactor {
     /**
      * @return the amount of EU output in the reactor tick just simulated.
      */
-    public double getCurrentEUoutput() {
-        return currentEUoutput;
+    public double getCurrentEuOutput() {
+        return currentEuOutput;
     }
 
     /**
@@ -112,31 +112,15 @@ public class Reactor {
      * add some EU output.
      * @param amount the amount of EU to output over 1 reactor tick (20 game ticks).
      */
-    public void addEUOutput(double amount) {
-        currentEUoutput += amount;
+    public void addEuOutput(double amount) {
+        currentEuOutput += amount;
     }
 
     /**
      * clears the EU output (presumably to start simulating a new reactor tick).
      */
-    public void clearEUOutput() {
-        currentEUoutput = 0.0;
-    }
-
-    /**
-     * Gets a list of the materials needed to build the components.
-     * @return a list of the materials needed to build the components.
-     */
-    public MaterialsList getMaterials() {
-        MaterialsList result = new MaterialsList();
-        for (int col = 0; col < grid[0].length; col++) {
-            for (int row = 0; row < grid.length; row++) {
-                if (grid[row][col] != null) {
-                    result.add(grid[row][col].getMaterials());
-                }
-            }
-        }
-        return result;
+    public void clearEuOutput() {
+        currentEuOutput = 0.0;
     }
 
     /**
@@ -170,7 +154,7 @@ public class Reactor {
         for (int row = 0; row < grid.length; row++) {
             for (int col = 0; col < grid[row].length; col++) {
                 final ReactorComponent component = grid[row][col];
-                final int id = ComponentFactory.getID(component);
+                final int id = ComponentFactory.getId(component);
                 result.append(String.format("%02X", id));
                 if (component != null && component.getInitialHeat() > 0) {
                     result.append(String.format("(h%s)", Integer.toString((int) component.getInitialHeat(), 36)));

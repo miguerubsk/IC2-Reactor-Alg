@@ -1,4 +1,4 @@
-package Simulator;
+package io.github.miguerubsk.ic2reactoralg.simulator;
 
 /**
  * Factory class to handle creating components by id or name.
@@ -19,7 +19,7 @@ public class ComponentFactory {
     }
 
     // id 0 is reserved for "empty" (no component), matching the historical encoding used by
-    // geneticAlg.codeHelper (2 hex chars per grid cell, 0x00 == empty).
+    // genetic.CodeHelper (2 hex chars per grid cell, 0x00 == empty).
     private static final ReactorComponent[] ITEMS = {
         null,
         new FuelRod(1, "fuelRodUranium", "Fuel Rod (Uranium)", 20e3, 1, null, 100, 2, 1, false),
@@ -135,7 +135,7 @@ public class ComponentFactory {
      * @param component the component to identify.
      * @return the id of the passed component, 0 if the component is null.
      */
-    public static int getID(ReactorComponent component) {
+    public static int getId(ReactorComponent component) {
         if (component != null) {
             return component.id;
         }
